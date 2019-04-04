@@ -317,18 +317,11 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
         old_time = time_to_second(batch[TIME_TAG])
         new_time = old_time * 1.5
         queue = batch["-q"]
-        if MANAGER == "PBS":
-            if queue in ["condo", "hotel"]:
-                if new_time > WALLTIME[queue]:
-                    sys.stderr.write("Cannot further increase walltime. "
-                                     "Will use home queue.")
-                    batch.change_queue("home")
-        else:
-            if new_time > WALLTIME[queue]:
-                queue_limit = batch.queue_limit["comet"]
-                sys.stderr.write("Cannot further increase walltime. "
-                                 "Set walltime: %s hrs.\n" % queue_limit)
-                new_time = WALLTIME[queue]
+        walltime_limit = WALLTIME[queue] if type(WALLTIME) == dict else WALLTIME
+        if new_time > walltime_limit:
+            new_time = walltime_limit
+            sys.stderr.write("Cannot further increase walltime. "
+                             "Set walltime: %s hrs.\n" % new_time)
         return second_to_time(new_time)
 
     if message in ["Not started yet", "Still running"]:
