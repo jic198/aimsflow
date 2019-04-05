@@ -148,17 +148,15 @@ class VaspFlow(object):
                 else:
                     status = "C"
                 incar = Incar.from_file("%s/INCAR" % folder)
+                ionic_step = outcar.ionic_step
+                nsw = incar.get("NSW", 0)
                 if k == "r":
-                    ionic_step = outcar.ionic_step
-                    nsw = incar.get("NSW", 0)
                     ediff = incar.get("EDIFF", 1E-4)
                     if all(abs(np.array(e_change)) < ediff) \
                             and "reached required accuracy" in vasp_out:
                         js["converge"][k].append(folder)
                     else:
-                        if status == "R":
-                            message = "Still running"
-                        elif ionic_step == nsw:
+                        if ionic_step == nsw:
                             message = "Hit NSW."
                         elif "reached required accuracy" in vasp_out:
                             message = "Fake convergence!"
@@ -185,6 +183,8 @@ class VaspFlow(object):
                             message = "ERROR ROTDIA: Call to routine ZHEEV failed"
                         elif hit_walltime(folder, outcar.date):
                             message = "Hit walltime"
+                        elif status == "R":
+                            message = "Still running"
                         else:
                             message = "Stop running"
                         js["un_converge"][k][folder] = message
@@ -199,12 +199,22 @@ class VaspFlow(object):
                     num = int(0.5 * (len(outcar.exet_press) - 1))
                     pressure = np.mean(outcar.exet_press[num:])
                     energy = outcar.ion_toten
-                    if abs(pressure) >= 5:
-                        js["un_converge"][k][folder] = 'The averaged pressure: %.3f kB' % pressure
-                        continue
                     norm_e = (energy / outcar.natom) / np.mean(energy / outcar.natom) - 1
-                    if abs(np.mean(norm_e[-500:]) - np.mean(norm_e)) > 0.0005:
-                        js["un_converge"][k][folder] = 'The averaged norm energy: %.3f eV' % norm_e
+                    if ionic_step == nsw:
+                        if abs(pressure) >= 5:
+                            message = 'The averaged pressure: %.3f kB' % pressure
+                        elif abs(np.mean(norm_e[-500:]) - np.mean(norm_e)) > 0.0005:
+                            message = 'The averaged norm energy: %.3f eV' % norm_e
+                        else:
+                            js["converge"][k].append(folder)
+                            continue
+                    elif hit_walltime(folder, outcar.date):
+                        message = "Hit walltime"
+                    elif status == "R":
+                        message = "Still running"
+                    else:
+                        message = "Stop running"
+                    js["un_converge"][k][folder] = message
                 else:
                     ediff = incar.get("EDIFF", 1E-4)
                     iteration = outcar.ionic_step
@@ -213,9 +223,7 @@ class VaspFlow(object):
                     if all(abs(np.array(e_change)) < ediff):
                         js["converge"][k].append(folder)
                     else:
-                        if status == 'R':
-                            message = "Still running"
-                        elif "decrease AMIN" in err_msg:
+                        if "decrease AMIN" in err_msg:
                             message = "decrease AMIN"
                         elif iteration == nelm:
                             message = "Hit NELM"
@@ -223,6 +231,8 @@ class VaspFlow(object):
                             message = "Error EDDDAV: Call to ZHEGV failed"
                         elif hit_walltime(folder, outcar.date):
                             message = "Hit walltime"
+                        elif status == 'R':
+                            message = "Still running"
                         else:
                             message = "Stop running"
                         js["un_converge"][k][folder] = message
