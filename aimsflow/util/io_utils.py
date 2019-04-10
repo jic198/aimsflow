@@ -67,10 +67,15 @@ def str_to_file(string, filename):
 
 
 def file_to_lines(filename, no_emptyline=False):
+    outs = []
     with zopen(filename) as f:
-        if no_emptyline:
-            return [i.strip("\n") for i in f.readlines() if i != '\n']
-        return [i.strip("\n") for i in f.readlines()]
+        for i in f.readlines():
+            if type(i) == bytes:
+                i = i.decode()
+            if no_emptyline and i == '\n':
+                continue
+            outs.append(i.strip("\n"))
+        return outs
 
 
 def immed_subdir(work_dir):

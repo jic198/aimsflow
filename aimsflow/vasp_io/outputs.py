@@ -545,7 +545,7 @@ class Outcar(object):
 
         date_patt = re.compile("\sdate\s(\S+)\s+(\S+)")
         efermi_patt = re.compile("E-fermi :\s*(\S+)")
-        toten_patt = re.compile("TOTEN\s+=\s+(-[\d\.]+)")
+        toten_patt = re.compile("free  energy   TOTEN\s+=\s+(-[\d\.]+)")
         iter_patt = re.compile("Iteration\s+(\d+)\(\s*(\d+)")
         echg_patt = re.compile("energy-change.*:\s*(.*?)\s\((.*?)\)")
         e_soc_patt = re.compile("E_soc:\s+([-\d\.]+)")
