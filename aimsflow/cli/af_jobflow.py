@@ -31,27 +31,29 @@ def vasp(args):
                 raise IOError("No 'job_flow.yaml' file in '%s'" % d)
             yaml.prepare_vasp(args.prepare, d, args.functional)
     elif args.kill:
-        cmd = 'qdel' if MANAGER == 'PBS' else 'scancel'
+        kcmd = 'qdel' if MANAGER == 'PBS' else 'scancel'
+        scmd = 'qstat' if MANAGER == 'PBS' else 'squeue'
+        dep = ' H ' if MANAGER == 'PBS' else 'Dependency'
+        username = getuser()
         if len(args.kill) == 1 and not args.kill[0].isdigit():
-            try:
-                job_id_list = file_to_lines("ID_list")
-            except IOError:
-                job_id_list = []
-                sys.stderr.write("No 'ID_list' file is found")
+            job_id_list = file_to_lines(args.kill[0])
         else:
-            username = getuser()
             job_id_list = args.kill
-            js_str = subprocess.check_output(['squeue', '-u', username]).decode('UTF-8')
-            depend_jobs = [i.split()[0] for i in js_str.rstrip().split('\n')[1:]
-                           if 'Dependency' in i]
-            for i in depend_jobs:
+
+        js_str = subprocess.check_output([scmd, '-u', username]).decode('UTF-8')
+        depend_jobs = [i.split()[0] for i in js_str.rstrip().split('\n')[1:]
+                       if dep in i]
+        for i in depend_jobs:
+            if MANAGER == 'PBS':
+                js_str = subprocess.check_output([scmd, '-f', i]).decode('UTF-8')
+            else:
                 js_str = subprocess.check_output(
                     ['scontrol', 'show', 'jobid', '-dd', i]).decode('UTF-8')
-                if re.search('afterany:(\d+)', js_str, re.M).group(1) in job_id_list:
-                    job_id_list.append(i)
+            if re.search('afterany:(\d+)', js_str, re.M).group(1) in job_id_list:
+                job_id_list.append(i)
 
         for job_id in job_id_list:
-            subprocess.call([cmd, job_id])
+            subprocess.call([kcmd, job_id])
             print("%s is killed" % job_id)
     else:
         flow = VaspFlow(directories)

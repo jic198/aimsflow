@@ -111,11 +111,6 @@ class VaspFlow(object):
                     js["un_converge"][k][folder] = 'POSMAP internal error'
                     continue
 
-                outcar = Outcar(outcar_file)
-                e_change = outcar.e_change
-                if not e_change:
-                    js["un_converge"][k][folder] = "Stop running"
-                    continue
                 # Temporary solution for the following errors.
                 if "inverse of rotation matrix was not found" in vasp_out:
                     message = "inverse of rotation matrix was not found " \
@@ -147,6 +142,12 @@ class VaspFlow(object):
                         status = "C"
                 else:
                     status = "C"
+
+                outcar = Outcar(outcar_file)
+                e_change = outcar.e_change
+                if e_change is None and status == "C":
+                    js["un_converge"][k][folder] = "Stop running"
+                    continue
                 incar = Incar.from_file("%s/INCAR" % folder)
                 ionic_step = outcar.ionic_step
                 nsw = incar.get("NSW", 0)
