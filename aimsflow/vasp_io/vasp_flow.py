@@ -217,7 +217,7 @@ class VaspFlow(object):
                     js["un_converge"][k][folder] = message
                 else:
                     ediff = incar.get("EDIFF", 1E-4)
-                    iteration = outcar.ionic_step
+                    iteration = outcar.electronic_step
                     err_msg = outcar.err_msg
                     nelm = incar.get("NELM", 60)
                     if all(abs(np.array(e_change)) < ediff):
