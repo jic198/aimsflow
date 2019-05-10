@@ -282,7 +282,7 @@ def main():
                                 help='Site number\nE.g. aimsflow analyze -gm -sn 1,2-5')
     parser_analyze.add_argument('-gb', '--get_bader', action='store_true',
                                 help='Calculate bader charge for each species\n'
-                                     'E.g. aimsflow analyze -bader')
+                                     'E.g. aimsflow analyze -gb')
     parser_analyze.set_defaults(func=analyze)
 
     parser_batch = subparsers.add_parser(

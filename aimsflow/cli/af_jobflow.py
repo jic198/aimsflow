@@ -316,7 +316,7 @@ def analyze(args):
         sorted_print(outs)
 
     if args.get_bader:
-        for path in directories:
+        for path in js["converge"]["s"]:
             chg = sorted(glob.glob('%s/CHGCAR*' % path))[-1]
             pot = sorted(glob.glob('%s/POTCAR*' % path))[-1]
             s = Structure.from_file(sorted(glob.glob('%s/POSCAR*' % path))[-1])
