@@ -233,6 +233,10 @@ def main():
                                  help='Set the functional for pseudopotential. '
                                       '(default: %(default)s)\n'
                                       'E.g. aimsflow vasp -p rs -f PBE_52')
+    parser_vasp_job.add_argument('-n', '--number', type=int, default=-1,
+                                 help='Set the maximum number of jobs to be '
+                                      'submitted. (default: %(default)s)\n'
+                                      'E.g. aimsflow vasp -s rs -n 5')
     parser_vasp_job.set_defaults(func=vasp)
 
     parser_analyze = subparsers.add_parser(

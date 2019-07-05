@@ -27,8 +27,7 @@ class VaspYaml(OrderedDict):
 
     @staticmethod
     def generate_from_jobtype(work_dir, job_type, add_u=False, add_mag=False,
-                              con_job=False, eint=-1.0, hse=False, soc=False,
-                              max_run=5):
+                              con_job=False, eint=-1.0, hse=False, soc=False, max_run=5):
         poscars = []
         job_name = []
         vasp_input = OrderedDict()

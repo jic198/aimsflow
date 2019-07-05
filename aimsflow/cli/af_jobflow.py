@@ -60,18 +60,24 @@ def vasp(args):
         if args.submit:
             jt = args.submit[0]
             js = flow.job_status
+            num = args.number
             if js["un_converge"] == {}:
                 sys.stderr.write("All %s calculations are finished!\n" % DIRNAME[jt])
             else:
                 try:
                     ji_list = []
+                    count = 0
                     for d, message in js["un_converge"][jt].items():
                         if message == "Still running":
                             print("Calculation in '%s' is %s" % (d, message))
                         elif re.search('%s_run\d+' % DIRNAME[jt], d):
                             print('Skip %s' % d)
                         else:
-                            ji_list.append(submit(d))
+                            if count < num or num == -1:
+                                ji_list.append(submit(d))
+                                count += 1
+                            else:
+                                break
 
                     if ji_list:
                         job_id_str = '\n'.join(ji_list)

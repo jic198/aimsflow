@@ -121,8 +121,8 @@ class VaspFlow(object):
                     message = "internal error in subroutine PRICEL"
                     js["un_converge"][k][folder] = message
                     continue
-                elif "Tetrahedron method fails for NKPT<4" in vasp_out:
-                    message = "Tetrahedron method fails for NKPT<4"
+                elif "Tetrahedron method fails" in vasp_out:
+                    message = "Tetrahedron method fails"
                     js["un_converge"][k][folder] = message
                     continue
 
