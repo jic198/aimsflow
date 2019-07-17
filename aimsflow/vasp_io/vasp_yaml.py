@@ -76,6 +76,17 @@ class VaspYaml(OrderedDict):
         if job_type == 'p':
             batch_run[TIME_TAG] = second_to_time(600)
         vasp_input['RUN_SCRIPT'] = batch_run.__str__()
+        batch_check = copy.deepcopy(batch_run)
+        command = [i for i in batch_run['command'].split('\n')
+                   if i.startswith('cd')]
+        command.append('aimsflow vasp -cj {job_type} -mr %s\n' % max_run)
+        err = batch_check['-e']
+        out = batch_check['-o']
+        batch_check.update({'command': '\n'.join(command),
+                            'others': '', TIME_TAG: second_to_time(500),
+                            '-e': err.replace('err.', 'err.check.'),
+                            '-o': out.replace('out.', 'out.check.')})
+        vasp_input['CHECK_SCRIPT'] = batch_check.__str__()
 
         if con_job:
             incar = Incar.from_file('%s/INCAR' % work_dir)
