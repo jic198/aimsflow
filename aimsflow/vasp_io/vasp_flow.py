@@ -94,10 +94,10 @@ class VaspFlow(object):
             js["converge"][k] = []
             js["un_converge"][k] = {}
             for folder in v:
-                if re.search('%s_run\d+' % DIRNAME[k], folder):
+                if re.search(f'{DIRNAME[k]}_run\d+', folder):
                     continue
-                vasp_out_file = sorted(glob.glob("%s/vasp.out*" % folder))
-                outcar_file = "%s/OUTCAR" % folder
+                vasp_out_file = sorted(glob.glob(f"{folder}/vasp.out*"))
+                outcar_file = f"{folder}/OUTCAR"
                 if not vasp_out_file or not os.path.exists(outcar_file):
                     js["un_converge"][k][folder] = "Not started yet"
                     continue
@@ -126,7 +126,7 @@ class VaspFlow(object):
                     js["un_converge"][k][folder] = message
                     continue
 
-                m = re.search("vasp.out.(\d+)", vasp_out_file[-1])
+                m = re.search("(\d+)", sorted(glob.glob(f"{folder}/out.*"))[-1])
                 if m:
                     job_id = m.group(1)
                     try:
