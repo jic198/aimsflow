@@ -42,6 +42,7 @@ JOURNAL_NAME = {
     'ci': ["ci", "Ceramics International"],
     'cm': ["cm", "Chem. Mater.", "CHEMISTRY OF MATERIALS", "Chemistry of Materials"],
     'cms': ["cms", "Comput. Mater. Sci.", "Computational Materials Science", "COMPUTATIONAL MATERIALS SCIENCE"],
+    'ccpe': ["ccpe", "Concurrency and Computation: Practice and Experience"],
     'cp': ["cp", "Chem. Phys.", "Chemical Physics"],
     'cpc': ["cpc", "ChemPhysChem"],
     'cpl': ["cpl", "Chem. Phys. Lett."],
@@ -195,7 +196,7 @@ BIB_PATTERN = {
 }
 RIS_PATTERN = {
     'author': re.compile('AU\s*-\s*(.*?)\s*\n', re.DOTALL | re.I),
-    'title': re.compile('TI\s*-\s*(.*?)\s*\n', re.DOTALL | re.I),
+    'title': re.compile('T[I|1]\s*-\s*(.*?)\s*\n', re.DOTALL | re.I),
     'journal': re.compile('J[A|O]\s*-\s*(.*?)\s*\n', re.DOTALL | re.I),
     'year': re.compile('PY\s*-\s*(.*?)[/|\n]', re.DOTALL | re.I),
     'volume': re.compile('VL\s*-\s*(.*?)\s*\n', re.DOTALL | re.I),
@@ -220,16 +221,15 @@ class Citation(object):
         self.cite = cite
 
     def __str__(self):
-        bib_str = '''@article{%s,
-    author = {%s},
-    title = {%s},
-    journal = %s,
-    year = {%s},
-    volume = {%s},
-    pages = {%s},
-    doi = {%s}
-}''' % (self.bibkey, self.author, self.title, self.journal, self.year,
-        self.volume, self.pages, self.doi)
+        bib_str = f'''@article{{{self.bibkey},
+    author = {{{self.author}}},
+    title = {{{self.title}}},
+    journal = {self.journal},
+    year = {{{self.year}}},
+    volume = {{{self.volume}}},
+    pages = {{{self.pages}}},
+    doi = {{{self.doi}}}
+}}'''
         return bib_str
 
     @property

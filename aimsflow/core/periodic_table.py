@@ -295,6 +295,11 @@ class Specie(object):
     def oxi_state(self):
         return self._oxi_state
 
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d['element'], d['oxidation_state'],
+                   d.get('properties', None))
+
     @staticmethod
     def from_string(species_string):
         m = re.search(r"([A-Z][a-z]*)([0-9\.]*)([\+\-])(.*)", species_string)
@@ -356,6 +361,11 @@ class DummySpecie(Specie):
     @property
     def Z(self):
         return 0
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d['element'], d['oxidation_state'],
+                   d.get('properties', None))
 
 
 def get_el_sp(obj):

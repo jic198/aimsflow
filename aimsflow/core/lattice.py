@@ -144,6 +144,14 @@ class Lattice(object):
             self._lll_inverse = np.linalg.inv(self.lll_mapping)
             return self._lll_inverse
 
+    @classmethod
+    def from_dict(cls, d):
+        if 'matrix' in d:
+            return cls(d['matrix'])
+        else:
+            return cls.from_parameters(d['a'], d['b'], d['c'],
+                                       d['alpha'], d['beta'], d['gamma'])
+
     @staticmethod
     def from_parameters(a, b, c, alpha, beta, gamma):
         alpha_r = radians(alpha)

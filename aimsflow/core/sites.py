@@ -1,8 +1,9 @@
 import collections
 import numpy as np
 
+from aimsflow.core.lattice import Lattice
 from aimsflow.core.composition import Composition
-from aimsflow.core.periodic_table import get_el_sp
+from aimsflow.core.periodic_table import Element, Specie, DummySpecie, get_el_sp
 from aimsflow.util import pbc_diff
 
 
@@ -139,6 +140,22 @@ class PeriodicSite(Site):
         #         self._fcoords[j] = 0
         return PeriodicSite(self._species, self._fcoords, self._lattice,
                             properties=self._properties)
+
+    @classmethod
+    def from_dict(cls, d, lattice=None):
+        atoms_n_occu = {}
+        for sp_occu in d['species']:
+            if 'oxidation_state' in sp_occu and \
+                    Element.is_valid_symbol(sp_occu['element']):
+                sp = Specie.from_dict(sp_occu)
+            elif 'oxidation_state' in sp_occu:
+                sp = DummySpecie.from_dict(sp_occu)
+            else:
+                sp = Element(sp_occu['element'])
+            atoms_n_occu[sp] = sp_occu['occu']
+        props = d.get('properties', None)
+        lattice = lattice if lattice else Lattice.from_dict(d['lattice'])
+        return cls(atoms_n_occu, d['abc'], lattice, properties=props)
 
     def distance_and_image_from_frac_coords(self, fcoords, jimage=None):
         return self._lattice.get_distance_and_image(self._fcoords, fcoords,

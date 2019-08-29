@@ -126,7 +126,7 @@ class VaspFlow(object):
                     js["un_converge"][k][folder] = message
                     continue
 
-                m = re.search("(\d+)", sorted(glob.glob(f"{folder}/out.*"))[-1])
+                m = re.search("out\.(\d+)", sorted(glob.glob(f"{folder}/out.*"))[-1])
                 if m:
                     job_id = m.group(1)
                     try:

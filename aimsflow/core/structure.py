@@ -341,7 +341,15 @@ class IStructure(SiteCollection):
         return new_s
 
     @classmethod
-    def from_sites(cls, sites, validate_proximity=False, to_unit_cell=False):
+    def from_dict(cls, d):
+        lattice = Lattice.from_dict(d['lattice'])
+        sites = [PeriodicSite.from_dict(sd, lattice) for sd in d['sites']]
+        charge = d.get('charge', None)
+        return cls.from_sites(sites, charge=charge)
+
+    @classmethod
+    def from_sites(cls, sites, charge=0, validate_proximity=False,
+                   to_unit_cell=False):
         if len(sites) < 1:
             raise ValueError("You need at least one site to construct a %s" %
                              cls)
