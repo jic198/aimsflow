@@ -42,6 +42,19 @@ class Lattice(object):
         return "\n".join([" ".join("%.6f" % i for i in row)
                           for row in self._matrix])
 
+    def as_dict(self, verbosity):
+        d = {
+            "@module": self.__class__.__module__,
+            "@class": self.__class__.__name__,
+            "matrix": self._matrix.tolist()
+        }
+        (a, b, c), (alpha, beta, gamma) = self.lengths_and_angles
+        if verbosity > 0:
+            d.update({'a': a, 'b': b, 'c': c,
+                      'alpha': alpha, 'beta': beta, 'gamma': gamma})
+        return d
+
+
     @property
     def matrix(self):
         return np.copy(self._matrix)

@@ -112,6 +112,15 @@ class PeriodicSite(Site):
                     self._fcoords[j] = 0
             cart_coords = self._lattice.get_cart_coords(self._fcoords)
 
+        if isinstance(atomic_symbol, Composition):
+            species = atomic_symbol
+        else:
+            try:
+                species = Composition({get_el_sp(atomic_symbol): 1})
+            except TypeError:
+                species = Composition(atomic_symbol)
+        self._species = species
+
         super(PeriodicSite, self).__init__(atomic_symbol, cart_coords, properties)
 
     def __repr__(self):
@@ -156,6 +165,26 @@ class PeriodicSite(Site):
         props = d.get('properties', None)
         lattice = lattice if lattice else Lattice.from_dict(d['lattice'])
         return cls(atoms_n_occu, d['abc'], lattice, properties=props)
+
+    def as_dict(self, verbosity=0):
+        species_list = []
+        for spec, occu in self._species.items():
+            d = spec.as_dict()
+            del d['@module']
+            del d['@class']
+            d['occu'] = occu
+            species_list.append(d)
+        d = {'species': species_list,
+             'abc': [float(c) for c in self._fcoords],
+             'lattice': self._lattice.as_dict(verbosity=verbosity),
+             '@module': self.__class__.__module__,
+             '@class': self.__class__.__name__
+             }
+        if verbosity > 0:
+            d['xyz'] = [float(c) for c in self.coords]
+            d['label'] = self.species_string
+        d['properties'] = self.properties
+        return d
 
     def distance_and_image_from_frac_coords(self, fcoords, jimage=None):
         return self._lattice.get_distance_and_image(self._fcoords, fcoords,

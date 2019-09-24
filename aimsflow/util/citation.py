@@ -178,8 +178,9 @@ JOURNAL_NAME = {
     'science': ["science", "Science"],
     'sa': ["Sci. Adv.", "Science Advances"],
     'ss': ["ss", "Surf. Sci.", "Surface Science"],
-    'tsf': ["tsf", "{Thin Solid Films"],
+    'tsf': ["tsf", "Thin Solid Films"],
     'tns': ["tns", "IEEE Trans. on Nucl. Sci."],
+    'vacuum': ["Vacuum"],
     'wst': ["wst", "Water Sci. Technol.", "Water Science and Technology"],
     'zac': ["zac", "Z. Anorganische Chemie", "Zeitschrift fur Anorganische Chemie"],
     'zaac': ["zaac", "Z. Anorganische und Allgemeine Chemie", "Zeitschrift fur Anorganische und Allgemeine Chemie"],
@@ -216,8 +217,8 @@ class Citation(object):
         elif fnmatch(fname.lower(), "*.bib*"):
             cite = find_re_pattern(BIB_PATTERN, str_cite)
         else:
-            raise IOError("'%s' is not a citation file. Please make sure the "
-                          "file formate is either '*.ris*' or '*.bib*'")
+            raise IOError(f"'{filename}' is not a citation file. Please make "
+                          "sure the file formate is either '*.ris*' or '*.bib*'")
         self.cite = cite
 
     def __str__(self):
@@ -266,7 +267,7 @@ class Citation(object):
                 find_journal = True
                 break
         if not find_journal:
-            journal = "{%s}" % self.cite['journal']
+            journal = f"{self.cite['journal']}"
         return journal
 
     @property
@@ -275,7 +276,7 @@ class Citation(object):
                        "to", "up", "and", "as", "but", "or", "nor", 'into',
                        "with", "from", "between", "via", "across"]
         new_title = self.cite['title'].split()
-        for i in range(0, len(new_title)):
+        for i in range(len(new_title)):
             if new_title[i] not in ignore_text:
                 if '-' in new_title[i]:
                     sub_new_title = new_title[i].split('-')
@@ -297,9 +298,9 @@ class Citation(object):
             ele_v = re.findall('([A-Z][a-z]*[\d\.]+)', new_title[i])
             for j in ele_v:
                 v = re.search('([\d\.]+)', j).group(1)
-                a += j.replace(v, '$_{%s}$' % v)
+                a += j.replace(v, f'$_{v}$')
             if a:
-                new_title[i] = new_title[i].replace(''.join(ele_v), a)
+                new_title[i] = new_title[i].replace(''.join(ele_v), f'{{{a}}}')
         return ' '.join(new_title)
 
     @property

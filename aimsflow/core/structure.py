@@ -109,7 +109,7 @@ class SiteCollection(six.with_metaclass(ABCMeta, collections.Sequence)):
 
 
 class IStructure(SiteCollection):
-    def __init__(self, lattice, species, coords,
+    def __init__(self, lattice, species, coords, charge=None,
                  to_unit_cell=False, validate_proximity=False,
                  coords_cartesian=False, site_properties=None):
         if len(species) != len(coords):
@@ -136,6 +136,7 @@ class IStructure(SiteCollection):
         if validate_proximity and not self.is_valid():
             raise StructureError(("Structure contains sites that are ",
                                   "less than 0.01 Angstrom apart!"))
+        self._charge = charge
 
     def __repr__(self):
         outs = ["Structure Summary", repr(self.lattice)]
@@ -348,7 +349,7 @@ class IStructure(SiteCollection):
         return cls.from_sites(sites, charge=charge)
 
     @classmethod
-    def from_sites(cls, sites, charge=0, validate_proximity=False,
+    def from_sites(cls, sites, charge=None, validate_proximity=False,
                    to_unit_cell=False):
         if len(sites) < 1:
             raise ValueError("You need at least one site to construct a %s" %
@@ -380,7 +381,7 @@ class IStructure(SiteCollection):
                 warnings.warn("Not all sites have property %s. Missing values "
                               "are set to None." % k)
         return cls(lattice, [site.species_and_occu for site in sites],
-                   [site.frac_coords for site in sites],
+                   [site.frac_coords for site in sites], charge=charge,
                    site_properties=props,
                    validate_proximity=validate_proximity,
                    to_unit_cell=to_unit_cell)
@@ -477,6 +478,24 @@ class IStructure(SiteCollection):
 
         s.__class__ = cls
         return s
+
+    def as_dict(self, verbosity=1):
+        latt_dict = self._lattice.as_dict(verbosity=verbosity)
+        del latt_dict['@module']
+        del latt_dict['@class']
+
+        d = {'@module': self.__class__.__module__,
+             '@class': self.__class__.__name__,
+             'charge': self._charge,
+             'lattice': latt_dict, 'sites': []
+             }
+        for site in self:
+            site_dict = site.as_dict(verbosity=verbosity)
+            del site_dict["lattice"]
+            del site_dict["@module"]
+            del site_dict["@class"]
+            d["sites"].append(site_dict)
+        return d
 
     def get_distance(self, i, j, jimage=None):
         return self[i].distance(self[j], jimage)
@@ -637,10 +656,10 @@ class IStructure(SiteCollection):
 class Structure(IStructure, collections.MutableSequence):
     __hash__ = None
 
-    def __init__(self, lattice, species, coords,
+    def __init__(self, lattice, species, coords, charge=None,
                  to_unit_cell=False, validate_proximity=False,
                  coords_cartesian=False, site_properties=None):
-        super(Structure, self).__init__(lattice, species, coords,
+        super(Structure, self).__init__(lattice, species, coords, charge=None,
                                         to_unit_cell=to_unit_cell,
                                         validate_proximity=validate_proximity,
                                         coords_cartesian=coords_cartesian,

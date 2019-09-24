@@ -223,6 +223,12 @@ class Element(Enum):
         except ValueError:
             return False
 
+    def as_dict(self):
+        return {'@module': self.__class__.__module__,
+                '@class': self.__class__.__name__,
+                'element': self.symbol
+                }
+
 
 class Specie(object):
     cache = {}

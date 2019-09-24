@@ -159,6 +159,12 @@ class Composition(collections.Hashable, collections.Mapping):
             return self._parse_formula(expand_formula)
         return get_symbol_dict(formula, 1)
 
+    def as_dict(self):
+        d = collections.defaultdict(float)
+        for e, a in self.items():
+            d[str(e)] += a
+        return d
+
 
 def reduce_formula(sym_amt):
     syms = sorted(sym_amt.keys(), key=lambda s: get_el_sp(s).X)
