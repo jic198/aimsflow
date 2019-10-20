@@ -145,8 +145,11 @@ class VaspFlow(object):
 
                 outcar = Outcar(outcar_file)
                 e_change = outcar.e_change
-                if e_change is None and status == "C":
-                    js["un_converge"][k][folder] = "Stop running"
+                if e_change is None:
+                    if status == "C":
+                        js["un_converge"][k][folder] = "Stop running"
+                    else:
+                        js["un_converge"][k][folder] = "Still running"
                     continue
                 incar = Incar.from_file("%s/INCAR" % folder)
                 ionic_step = outcar.ionic_step
@@ -327,7 +330,7 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
     def update_walltime(batch):
         old_time = time_to_second(batch[TIME_TAG])
         new_time = old_time * 1.5
-        queue = batch["-q"]
+        queue = batch.get("-q")
         walltime_limit = WALLTIME[queue] if type(WALLTIME) == dict else WALLTIME
         if new_time > walltime_limit:
             new_time = walltime_limit

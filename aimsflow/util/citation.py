@@ -63,7 +63,9 @@ JOURNAL_NAME = {
     'fardis': ["fardis", "Faraday Discuss.", "Faraday Discussions"],
     'ferro': ["ferro", "Ferroelectrics"],
     'ieeeml': ["ieeeml", "IEEE Trans. Magn.", "IEEE Transactions on Magnetics"],
-    'ieeetm': ["ieeetm", "IEEE Magn. Lett.", "IEEE Magnetics Letters"],
+    'ieeetm': ["ieeetm", "IEEE Magn. Lett.", "IEEE Transactions on Electron Devices"],
+    'ieeeted': ["ieeeted", "Trans. Electron Devices", "IEEE Magnetics Letters"],
+    'tns': ["tns", "IEEE Trans. on Nucl. Sci."],
     'ic': ["ic", "Inorg. Chem.", "Inorganic Chemistry"],
     'ijhe': ["ijhe", "Int. J. Hydrogen Energy", "International Journal of Hydrogen Energy"],
     'ijp': ["ijp", "Int. J. Photoenergy", "International Journal of Photoenergy"],
@@ -179,7 +181,6 @@ JOURNAL_NAME = {
     'sa': ["Sci. Adv.", "Science Advances"],
     'ss': ["ss", "Surf. Sci.", "Surface Science"],
     'tsf': ["tsf", "Thin Solid Films"],
-    'tns': ["tns", "IEEE Trans. on Nucl. Sci."],
     'vacuum': ["Vacuum"],
     'wst': ["wst", "Water Sci. Technol.", "Water Science and Technology"],
     'zac': ["zac", "Z. Anorganische Chemie", "Zeitschrift fur Anorganische Chemie"],
@@ -202,7 +203,7 @@ RIS_PATTERN = {
     'year': re.compile('PY\s*-\s*(.*?)[/|\n]', re.DOTALL | re.I),
     'volume': re.compile('VL\s*-\s*(.*?)\s*\n', re.DOTALL | re.I),
     'pages': re.compile('SP\s*-\s*(.*?)\s*\n', re.DOTALL | re.I),
-    'doi': re.compile('UR\s*-\s*(.*?)\s*\n', re.DOTALL | re.I)
+    'doi': re.compile('UR|DO\s*-\s*(.*?)\s*\n', re.DOTALL | re.I)
     }
 
 
@@ -219,6 +220,8 @@ class Citation(object):
         else:
             raise IOError(f"'{filename}' is not a citation file. Please make "
                           "sure the file formate is either '*.ris*' or '*.bib*'")
+        if type(cite['journal']) is list:
+            cite['journal'] = cite['journal'][0]
         self.cite = cite
 
     def __str__(self):
