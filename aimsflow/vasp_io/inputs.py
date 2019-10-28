@@ -674,7 +674,8 @@ class Potcar(list):
     def from_string(string):
         chuncks = re.findall("\n?(\s*.*?End of Dataset)", string, re.S)
         psps = [PotcarSingle(i) for i in chuncks]
-        functional = psps[0].functional
+        all_funs = [i.functional for i in psps]
+        functional = psps[0].functional if "PBE_52" not in all_funs else "PBE_52"
         return Potcar(psps, functional)
 
     @staticmethod
