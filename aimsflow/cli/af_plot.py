@@ -135,7 +135,7 @@ def plot_locpot(args):
     v = parse_source(args.source)
     path = os.path.abspath(args.directory)
     folders = path.split("/")
-    sys_name = "%s_%s" % (folders[-2], folders[-1])
+    sys_name = f"{folders[-2]}_{folders[-1]}"
     all_pot, all_z = v.plan_average
     marc_pot, marc_z = v.marc_average(args.nlayers)
     pot_dict = {}

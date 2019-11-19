@@ -334,8 +334,8 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
         walltime_limit = WALLTIME[queue] if type(WALLTIME) == dict else WALLTIME
         if new_time > walltime_limit:
             new_time = walltime_limit
-            sys.stderr.write("Cannot further increase walltime. "
-                             "Set walltime: %s hrs.\n" % new_time)
+            sys.stderr.write(f"Cannot further increase walltime. "
+                             f"Set walltime: {new_time} s.\n")
         return second_to_time(new_time)
 
     if message in ["Not started yet", "Still running"]:
@@ -347,8 +347,8 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
     run_times = len(glob.glob(os.path.join(out_folder, DIRNAME[jt] + '_run*')))
     walltime = None
     if run_times >= max_run:
-        raise RuntimeError("aimsflow has tried at least %s times rerun and "
-                           "will stop trying in %s" % (max_run, folder))
+        raise RuntimeError(f"aimsflow has tried at least {max_run} times rerun and "
+                           f"will stop trying in {folder}")
     elif run_times == 1:
         # The current directory contains "relax", "static" or "md"
         name = DIRNAME[jt] + '_run2'
