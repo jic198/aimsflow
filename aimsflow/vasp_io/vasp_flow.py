@@ -36,10 +36,10 @@ class VaspFlow(object):
             directories = [directories]
         for work_dir in directories:
             for root, dirs, files in os.walk(work_dir, topdown=False):
-                if root != "./":
+                if root != "./" and "../" not in root:
                     root = root.replace("./", "")
                 if all(f in files for f in VASPFILES):
-                    incar = Incar.from_file("%s/INCAR" % root)
+                    incar = Incar.from_file(f"{root}/INCAR")
                     if incar.get("NSW", 0) > 1:
                         if incar["IBRION"] == 0:
                             folders["m"].append(root)

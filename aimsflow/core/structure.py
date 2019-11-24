@@ -869,6 +869,15 @@ class Structure(IStructure, collections.MutableSequence):
                                           properties=props)
 
     def add_selective_dynamics(self, fix_list, tol=0.25):
+        """
+        Add selective dynamics properties for sites sorted by layers
+        Args:
+            fix_list (list): A list of layer indices
+            tol (float): Tolerance factor to determnine if atoms in the same layer
+
+        Returns: A Structure object with selective dynamics properties
+
+        """
         layers = self.sort_sites_in_layers(tol=tol)
         sd_sites = []
         new_sites = []
