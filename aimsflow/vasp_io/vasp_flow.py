@@ -54,7 +54,7 @@ class VaspFlow(object):
                             else:
                                 folders["s"].append(root)
                         else:
-                            kpt = Kpoints.from_file("%s/KPOINTS" % root)
+                            kpt = Kpoints.from_file(f"{root}/KPOINTS")
                             if kpt.style.name == "Line_mode":
                                 folders["b"].append(root)
                             else:
@@ -79,9 +79,9 @@ class VaspFlow(object):
             try:
                 script = BatchFile.from_file("%s/runscript.sh" % path)
             except IOError:
-                f = sorted(glob.glob("%s/*sh" % path))[-1]
-                print("In %s aimsflow cannot find runscript.sh so will use "
-                      "%s to get the calculation walltime." % (path, f))
+                f = sorted(glob.glob(f"{path}/*sh"))[-1]
+                print(f"In {path} aimsflow cannot find runscript.sh so will use "
+                      f"{f} to get the calculation walltime.")
                 script = BatchFile.from_file(f)
             try:
                 walltime = time_to_second(script[TIME_TAG])
@@ -253,14 +253,14 @@ class VaspFlow(object):
         """
         js = self.job_status
         if js["un_converge"] == {}:
-            sys.stderr.write("All %s calculations are finished!\n" % DIRNAME[jt])
+            sys.stderr.write(f"All {DIRNAME[jt]} calculations are finished!\n")
         else:
             try:
                 ji_list = []
                 for d in js["un_converge"][jt]:
                     message = js["un_converge"][jt][d]
                     if message == "Still running":
-                        print("Calculation in '%s' is %s." % (d, message))
+                        print(f"Calculation in {d} is {message}.")
                     else:
                         ji_list.append(submit(d))
 

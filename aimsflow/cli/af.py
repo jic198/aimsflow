@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 from __future__ import division
 
+import re
+import os
 import sys
 import json
+import shutil
 import urllib
 import argparse
+import subprocess
 import numpy as np
 try:
     from urllib.request import urlopen, urlretrieve
 except ImportError:
     from urllib import urlopen, urlretrieve
-
-
 from aimsflow import Structure
 from aimsflow.symmetry.bandstructure import HighSymmKpath
 from aimsflow.vasp_io import BatchFile, Poscar, Potcar, Kpoints
@@ -23,7 +25,7 @@ from aimsflow.cli.af_plot import plot_tdos, plot_pdos, plot_ldos, plot_band,\
     plot_band_pro, plot_locpot
 from aimsflow.cli.af_build import build_hs, build_strain, build_if, build_ferro,\
     build_sc, build_rotate, build_slab, translate_sites, remove
-from aimsflow.util import str_to_file, file_to_str, Citation
+from aimsflow.util import str_to_file, file_to_str, Citation, immed_file_paths
 
 
 def batch(args):
@@ -60,6 +62,38 @@ def batch(args):
             script = BatchFile.convert_batch(script)
 
         script.write_file(f)
+
+
+def queue(args):
+    def get_job_path(job_id):
+        out = subprocess.check_output(["scontrol", "show", "jobid", "-dd",
+                                       job_id]).decode('UTF-8')
+        return re.search('WorkDir=(.*)\n', out).group(1)
+
+    out = subprocess.check_output(["squeue", "-u", "jic198"]).decode('UTF-8')
+    hold_ids = re.findall('\s*(\d+).*aimsflow.*JobHeldUser', out)
+
+    dir = os.getcwd()
+    if args.available:
+        n = args.available
+        for job_id in hold_ids[:n]:
+            path = get_job_path(job_id)
+            print(job_id, path)
+
+    if args.prepare:
+        folders = args.prepare
+        for i, folder in enumerate(folders):
+            ipath = os.path.join(dir, folder)
+            files = immed_file_paths(ipath)
+            epath = get_job_path(hold_ids[i])
+            for f in files:
+                shutil.copy(f, epath)
+
+    if args.launch:
+        n = args.launch
+        for job_id in hold_ids[:n]:
+            subprocess.check_output(["scontrol", "release", job_id]).decode('UTF-8')
+            print(f'Release {job_id}')
 
 
 def combine_dos(args):
@@ -288,6 +322,16 @@ def main():
                                 help='Calculate bader charge for each species\n'
                                      'E.g. aimsflow analyze -gb')
     parser_analyze.set_defaults(func=analyze)
+
+    parser_queue = subparsers.add_parser(
+        'queue', help='Prepare files for the hold jobs', formatter_class=argparse.RawTextHelpFormatter)
+    parser_queue.add_argument('-a', '--available', metavar='available', type=int,
+                              help='Check available hold jobs')
+    parser_queue.add_argument('-p', '--prepare', metavar='prepare', nargs='*',
+                              help='Copy files to the path of a hold job')
+    parser_queue.add_argument('-l', '--launch', metavar='launch', type=int,
+                              help='Launch the hold jobs')
+    parser_queue.set_defaults(func=queue)
 
     parser_batch = subparsers.add_parser(
         'batch', help='Change batch script setting.', formatter_class=argparse.RawTextHelpFormatter)

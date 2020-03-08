@@ -13,6 +13,7 @@ JOURNAL_NAME = {
             "ACS Applied Materials and Interfaces",
             "ACS Applied Materials \& Interfaces"],
     'acsnano': ["acsnano", "ACS Nano"],
+    'acsel': ["acsel", "ACS Energy Lett.", "ACS Energy Letters"],
     'acscata': ["acscata", "ACS Catal."],
     'acscombsci': ["acscombsci", "ACS Comb. Sci."],
     'actaca': ["actaca", "Acta Crystallogr. Sect. A",
@@ -303,7 +304,8 @@ class Citation(object):
                 v = re.search('([\d\.]+)', j).group(1)
                 a += j.replace(v, f'$_{v}$')
             if a:
-                new_title[i] = new_title[i].replace(''.join(ele_v), f'{{{a}}}')
+                tmp = new_title[i].replace(''.join(ele_v), f'{a}')
+                new_title[i] = f'{{{tmp}}}'
         return ' '.join(new_title)
 
     @property
@@ -318,5 +320,5 @@ class Citation(object):
             first_author = re.findall('\s(.*)', self.author)[0]
 
         first_author = re.sub('[^a-zA-Z]+', '', first_author)
-        key = '%s_%s_%s' % (first_author, self.year, self.journal)
+        key = f'{first_author}_{self.year}_{self.journal}'
         return key.replace(" ", "")

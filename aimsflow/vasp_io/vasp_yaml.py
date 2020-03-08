@@ -257,7 +257,7 @@ class VaspYaml(OrderedDict):
         if suffix is not None:
             jp += str(suffix)
             jn += str(suffix)
-        print('aimsflow is working on %s' % jp)
+        print(f'aimsflow is working on {jp}')
         make_path(jp)
         poscar.write_file('%s/POSCAR' % jp)
         elements = poscar.site_symbols
@@ -322,7 +322,7 @@ class VaspYaml(OrderedDict):
             job_name=job_name, command=command, user_name=user_name, exe=exe)
         checkscript = self['CHECK_SCRIPT'].format(
             user_name=user_name, job_type=jt + next_jt,
-            job_name='check_' + jn)
+            job_name='check_' + jn, path=jp)
         # reduce walltime by 50% if next_jt is 's'
         if jt == 's':
             new_script = BatchFile.from_string(runscript)
