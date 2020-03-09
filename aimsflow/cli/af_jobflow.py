@@ -23,12 +23,14 @@ from aimsflow.vasp_io import Eigenval, Procar, Doscar, BatchFile, Poscar, VaspYa
 def vasp(args):
     directories = file_to_lines(args.directory_file) if args.directory_file \
         else args.directories
+    cur_dir = os.getcwd()
     if args.prepare:
         for d in directories:
+            d = os.path.join(cur_dir, d)
             try:
-                yaml = VaspYaml.from_file("%s/job_flow.yaml" % d)
+                yaml = VaspYaml.from_file(f"{d}/job_flow.yaml")
             except IOError:
-                raise IOError("No 'job_flow.yaml' file in '%s'" % d)
+                raise IOError(f"No 'job_flow.yaml' file in '{d}'")
             yaml.prepare_vasp(args.prepare, d, args.functional)
     elif args.kill:
         kcmd = 'qdel' if MANAGER == 'PBS' else 'scancel'
@@ -62,7 +64,7 @@ def vasp(args):
             js = flow.job_status
             num = args.number
             if js["un_converge"] == {}:
-                sys.stderr.write("All %s calculations are finished!\n" % DIRNAME[jt])
+                sys.stderr.write(f"All {DIRNAME[jt]} calculations are finished!\n")
             else:
                 try:
                     ji_list = []
