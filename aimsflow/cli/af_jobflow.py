@@ -23,10 +23,9 @@ from aimsflow.vasp_io import Eigenval, Procar, Doscar, BatchFile, Poscar, VaspYa
 def vasp(args):
     directories = file_to_lines(args.directory_file) if args.directory_file \
         else args.directories
-    cur_dir = os.getcwd()
     if args.prepare:
         for d in directories:
-            d = os.path.join(cur_dir, d)
+            d = os.path.abspath(d)
             try:
                 yaml = VaspYaml.from_file(f"{d}/job_flow.yaml")
             except IOError:

@@ -292,7 +292,7 @@ def submit(work_dir):
     job_id_str = subprocess.check_output([command, "runscript.sh"]).decode('UTF-8')
     try:
         job_id = re.search('(\d+)', job_id_str).group(1)
-        print("Successfully submit job in %s with ID: %s" % (work_dir, job_id))
+        print(f"Successfully submit job in {work_dir} with ID: {job_id}")
     except IndexError:
         job_id = None
     os.chdir(cur_dir)

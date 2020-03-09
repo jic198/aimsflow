@@ -16,7 +16,7 @@ except ImportError:
     from urllib import urlopen, urlretrieve
 from aimsflow import Structure
 from aimsflow.symmetry.bandstructure import HighSymmKpath
-from aimsflow.vasp_io import BatchFile, Poscar, Potcar, Kpoints
+from aimsflow.vasp_io import BatchFile, Poscar, Potcar, Kpoints, MANAGER
 from aimsflow.cli.af_config import configure_af
 from aimsflow.cli.af_jobflow import vasp, analyze, jyaml
 from aimsflow.cli.af_calculate import emass, tolerance_factor, interface_dist,\
@@ -25,7 +25,7 @@ from aimsflow.cli.af_plot import plot_tdos, plot_pdos, plot_ldos, plot_band,\
     plot_band_pro, plot_locpot
 from aimsflow.cli.af_build import build_hs, build_strain, build_if, build_ferro,\
     build_sc, build_rotate, build_slab, translate_sites, remove
-from aimsflow.util import str_to_file, file_to_str, Citation, immed_file_paths
+from aimsflow.util import str_to_file, file_to_str, Citation, immed_subdir_paths
 
 
 def batch(args):
@@ -73,7 +73,6 @@ def queue(args):
     out = subprocess.check_output(["squeue", "-u", "jic198"]).decode('UTF-8')
     hold_ids = re.findall('\s*(\d+).*aimsflow.*JobHeldUser', out)
 
-    dir = os.getcwd()
     if args.available:
         n = args.available
         for job_id in hold_ids[:n]:
@@ -83,17 +82,37 @@ def queue(args):
     if args.prepare:
         folders = args.prepare
         for i, folder in enumerate(folders):
-            ipath = os.path.join(dir, folder)
-            files = immed_file_paths(ipath)
+            ipath = os.path.abspath(folder)
             epath = get_job_path(hold_ids[i])
-            for f in files:
-                shutil.copy(f, epath)
+            print(f'Copy files from {ipath} to {epath}')
+            for item in os.listdir(ipath):
+                s = os.path.join(ipath, item)
+                d = os.path.join(epath, item)
+                if os.path.isdir(s):
+                    shutil.copytree(s, d)
+                else:
+                    shutil.copy(s, d)
 
     if args.launch:
         n = args.launch
         for job_id in hold_ids[:n]:
             subprocess.check_output(["scontrol", "release", job_id]).decode('UTF-8')
             print(f'Release {job_id}')
+
+    if args.submit:
+        path = os.path.abspath(args.submit)
+        f_path = os.path.join(path, 'runscript')
+        if not os.path.exists(f_path):
+            raise IOError(f"No 'runscript' in {path}")
+        for folder in immed_subdir_paths(path):
+            if not os.listdir(folder):
+                shutil.copy(f_path, folder)
+                os.chdir(folder)
+                command = "qsub" if MANAGER == "PBS" else "sbatch"
+                job_id_str = subprocess.check_output([command, "runscript.sh"]).decode('UTF-8')
+                job_id = re.search('(\d+)', job_id_str).group(1)
+                subprocess.check_output(["scontrol", "hold", job_id]).decode('UTF-8')
+                print(f"Successfully submit a hold job in {folder} with ID: {job_id}")
 
 
 def combine_dos(args):
@@ -331,6 +350,8 @@ def main():
                               help='Copy files to the path of a hold job')
     parser_queue.add_argument('-l', '--launch', metavar='launch', type=int,
                               help='Launch the hold jobs')
+    parser_queue.add_argument('-s', '--submit', metavar='submit', type=str,
+                              help='Submit the hold jobs')
     parser_queue.set_defaults(func=queue)
 
     parser_batch = subparsers.add_parser(
