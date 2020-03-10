@@ -79,8 +79,8 @@ def queue(args):
             path = get_job_path(job_id)
             print(job_id, path)
 
-    if args.prepare:
-        folders = args.prepare
+    if args.launch:
+        folders = args.launch
         for i, folder in enumerate(folders):
             ipath = os.path.abspath(folder)
             epath = get_job_path(hold_ids[i])
@@ -92,18 +92,14 @@ def queue(args):
                     shutil.copytree(s, d)
                 else:
                     shutil.copy(s, d)
-
-    if args.launch:
-        n = args.launch
-        for job_id in hold_ids[:n]:
-            subprocess.check_output(["scontrol", "release", job_id]).decode('UTF-8')
-            print(f'Release {job_id}')
+            print(f'Release {hold_ids[i]}')
+            subprocess.check_output(["scontrol", "release", hold_ids[i]])
 
     if args.submit:
         path = os.path.abspath(args.submit)
-        f_path = os.path.join(path, 'runscript')
+        f_path = os.path.join(path, 'runscript.sh')
         if not os.path.exists(f_path):
-            raise IOError(f"No 'runscript' in {path}")
+            raise IOError(f"No 'runscript.sh' in {path}")
         for folder in immed_subdir_paths(path):
             if not os.listdir(folder):
                 shutil.copy(f_path, folder)
@@ -346,10 +342,8 @@ def main():
         'queue', help='Prepare files for the hold jobs', formatter_class=argparse.RawTextHelpFormatter)
     parser_queue.add_argument('-a', '--available', metavar='available', type=int,
                               help='Check available hold jobs')
-    parser_queue.add_argument('-p', '--prepare', metavar='prepare', nargs='*',
-                              help='Copy files to the path of a hold job')
-    parser_queue.add_argument('-l', '--launch', metavar='launch', type=int,
-                              help='Launch the hold jobs')
+    parser_queue.add_argument('-l', '--launch', metavar='launch', nargs='*',
+                              help='Copy files to the path of a hold job and launch it')
     parser_queue.add_argument('-s', '--submit', metavar='submit', type=str,
                               help='Submit the hold jobs')
     parser_queue.set_defaults(func=queue)
