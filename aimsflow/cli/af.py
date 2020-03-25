@@ -16,7 +16,7 @@ except ImportError:
     from urllib import urlopen, urlretrieve
 from aimsflow import Structure
 from aimsflow.symmetry.bandstructure import HighSymmKpath
-from aimsflow.vasp_io import BatchFile, Poscar, Potcar, Kpoints, MANAGER
+from aimsflow.vasp_io import BatchFile, Poscar, Potcar, Kpoints, VaspFlow, MANAGER
 from aimsflow.cli.af_config import configure_af
 from aimsflow.cli.af_jobflow import vasp, analyze, jyaml
 from aimsflow.cli.af_calculate import emass, tolerance_factor, interface_dist,\
@@ -82,6 +82,11 @@ def queue(args):
     if args.launch:
         folders = args.launch
         for i, folder in enumerate(folders):
+            flow = VaspFlow(folder)
+            js = flow.job_status
+            if js["un_converge"] == {}:
+                print(f"Calculation in {folder} is finished!\n")
+                continue
             ipath = os.path.abspath(folder)
             epath = get_job_path(hold_ids[i])
             print(f'Copy files from {ipath} to {epath}')
