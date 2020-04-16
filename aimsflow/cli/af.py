@@ -82,6 +82,8 @@ def queue(args):
     if args.launch:
         folders = args.launch
         for i, folder in enumerate(folders):
+            if os.path.isfile(folder):
+                continue
             flow = VaspFlow(folder)
             js = flow.job_status
             if js["un_converge"] == {}:
