@@ -203,6 +203,7 @@ class VaspYaml(OrderedDict):
         return VaspYaml(vasp_input)
 
     def prepare_vasp(self, jt, work_dir, functional='PBE'):
+        make_path(work_dir)
         vasp_jobs = self.get('POSCAR')
         if vasp_jobs is None:
             raise IOError('No POSCARs in yaml file.')
