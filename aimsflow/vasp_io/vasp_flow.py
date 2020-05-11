@@ -342,6 +342,7 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
         print(message)
         return
 
+    walltime = None
     out_folder = os.path.abspath(folder).rsplit('/', 1)[0]
     work_dir = out_folder
     run_times = len(glob.glob(os.path.join(out_folder, DIRNAME[jt] + '_run*')))
@@ -410,7 +411,7 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
             s = Poscar.from_file("%s/CONTCAR" % folder)
         elif "walltime" in message:
             script = BatchFile.from_file("%s/runscript.sh" % folder)
-            walltime = update_walltime(script)
+            walltime = update_walltime(script) if ADD_WALLTIME else None
             s = Poscar.from_file("%s/CONTCAR" % folder)
     elif jt == 'm':
         s = Poscar.from_file("%s/CONTCAR" % folder)
@@ -460,11 +461,10 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
             elif "walltime" in message:
                 incar.update({"NELMDL": -12})
                 script = BatchFile.from_file("%s/runscript.sh" % folder)
-                walltime = update_walltime(script)
+                walltime = update_walltime(script) if ADD_WALLTIME else None
             else:
                 raise RuntimeError("aimsflow failed to fix %s for job in %s"
                                    % (message, folder))
-    walltime = walltime if ADD_WALLTIME else None
     job = VaspYaml.generate_from_vasp_files(folder, incar=incar, poscar=s,
                                             name_suffix=name_suffix,
                                             folder_name=DIRNAME[jt],
