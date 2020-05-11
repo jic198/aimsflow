@@ -8,7 +8,7 @@ import numpy as np
 from fnmatch import fnmatch
 from collections import defaultdict
 
-from aimsflow import Structure
+from aimsflow import Structure, ADD_WALLTIME
 from aimsflow.vasp_io import Incar, Outcar, Poscar, Potcar, BatchFile, \
     DIRNAME, TIME_TAG, MANAGER, WALLTIME, Kpoints, VaspYaml
 from aimsflow.util import file_to_str, str_to_file, time_to_second, \
@@ -345,7 +345,6 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
     out_folder = os.path.abspath(folder).rsplit('/', 1)[0]
     work_dir = out_folder
     run_times = len(glob.glob(os.path.join(out_folder, DIRNAME[jt] + '_run*')))
-    walltime = None
     if run_times >= max_run:
         raise RuntimeError(f"aimsflow has tried at least {max_run} times rerun and "
                            f"will stop trying in {folder}")
@@ -465,7 +464,7 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
             else:
                 raise RuntimeError("aimsflow failed to fix %s for job in %s"
                                    % (message, folder))
-
+    walltime = walltime if ADD_WALLTIME else None
     job = VaspYaml.generate_from_vasp_files(folder, incar=incar, poscar=s,
                                             name_suffix=name_suffix,
                                             folder_name=DIRNAME[jt],

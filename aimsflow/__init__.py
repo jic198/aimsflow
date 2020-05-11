@@ -24,6 +24,11 @@ def _load_aimsflow_settings():
         raise KeyError("Please set the AF_BATCH environment in ~/.afrc.yaml")
 
     try:
+        ADD_WALLTIME = d["AF_ADD_WALLTIME"]
+    except KeyError:
+        ADD_WALLTIME = True
+
+    try:
         WALLTIME = d["AF_WALLTIME"]
     except KeyError:
         WALLTIME = 1000
@@ -33,9 +38,9 @@ def _load_aimsflow_settings():
                       "limit of job.")
         literal_dumpfn(d, SETTINGS_FILE, default_flow_style=False)
 
-    return PSP_DIR, MANAGER, TIME_TAG, BATCH, WALLTIME
+    return PSP_DIR, MANAGER, TIME_TAG, BATCH, WALLTIME, ADD_WALLTIME
 
 
-PSP_DIR, MANAGER, TIME_TAG, BATCH, WALLTIME = _load_aimsflow_settings()
+PSP_DIR, MANAGER, TIME_TAG, BATCH, WALLTIME, ADD_WALLTIME = _load_aimsflow_settings()
 
 from aimsflow.core import *

@@ -116,7 +116,7 @@ class VaspYaml(OrderedDict):
                 else:
                     incar_tmp.update(
                         {'LWAVE': False, 'LORBIT': 11, 'ISMEAR': -5,
-                         'EDIFF': 1e-6, 'ALGO': 'Normal', 'ICHARG': 2})
+                         'EDIFF': 1e-6, 'ALGO': 'Normal', 'ICHARG': 0})
                 if soc is not False:
                     job['SOC'] = soc
                     vasp_input['ADD_MAG'] = True

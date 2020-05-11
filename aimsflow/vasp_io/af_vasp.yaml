@@ -1,15 +1,18 @@
 EXE: vasp_std
 INCAR:
+  ADDGRID: True
   ALGO: Fast
   EDIFF: 1E-5
   EDIFFG: -0.01
   ENCUT: 450
   IBRION: 2
   ISIF: 3
-  ISMEAR: 0
+  ISMEAR: -5
   ISPIN: 2
+  LASPH: True
   LWAVE: False
   LCHARG: False
+  LORBIT: 11
   LREAL: Auto
   LMAXMIX: 4
   NPAR: 4
@@ -92,7 +95,7 @@ LDAUU:
   Cr: 3.7
   La: 7.5
   Fe: 6.0
-  Mn: 4.5
+  Mn: 3.9
   Mo: 4.38
   Ni: 6.2
   Ti: 5.8
