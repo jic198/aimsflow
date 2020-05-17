@@ -103,12 +103,14 @@ def queue(args):
             subprocess.check_output(["scontrol", "release", hold_ids[i]])
 
     if args.submit:
-        path = os.path.abspath(args.submit)
+        n_max = args.submit
+        path = os.getcwd()
+        count = 0
         f_path = os.path.join(path, 'runscript.sh')
         if not os.path.exists(f_path):
             raise IOError(f"No 'runscript.sh' in {path}")
         for folder in immed_subdir_paths(path):
-            if not os.listdir(folder):
+            if not os.listdir(folder) and count <= n_max:
                 shutil.copy(f_path, folder)
                 os.chdir(folder)
                 command = "qsub" if MANAGER == "PBS" else "sbatch"
@@ -116,6 +118,7 @@ def queue(args):
                 job_id = re.search('(\d+)', job_id_str).group(1)
                 subprocess.check_output(["scontrol", "hold", job_id]).decode('UTF-8')
                 print(f"Successfully submit a hold job in {folder} with ID: {job_id}")
+                count += 1
 
 
 def combine_dos(args):
@@ -351,8 +354,8 @@ def main():
                               help='Check available hold jobs')
     parser_queue.add_argument('-l', '--launch', metavar='launch', nargs='*',
                               help='Copy files to the path of a hold job and launch it')
-    parser_queue.add_argument('-s', '--submit', metavar='submit', type=str,
-                              help='Submit the hold jobs')
+    parser_queue.add_argument('-s', '--submit', metavar='submit', type=int,
+                              help='Submit hold jobs')
     parser_queue.set_defaults(func=queue)
 
     parser_batch = subparsers.add_parser(
