@@ -81,7 +81,8 @@ def queue(args):
 
     if args.launch:
         folders = args.launch
-        for i, folder in enumerate(folders):
+        i = -1
+        for folder in folders:
             if os.path.isfile(folder):
                 continue
             flow = VaspFlow(folder)
@@ -89,6 +90,7 @@ def queue(args):
             if js["un_converge"] == {}:
                 print(f"Calculation in {folder} is finished!\n")
                 continue
+            i += 1
             ipath = os.path.abspath(folder)
             epath = get_job_path(hold_ids[i])
             print(f'Copy files from {ipath} to {epath}')
