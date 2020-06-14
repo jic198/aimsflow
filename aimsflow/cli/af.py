@@ -92,7 +92,10 @@ def queue(args):
                 continue
             i += 1
             ipath = os.path.abspath(folder)
-            epath = get_job_path(hold_ids[i])
+            try:
+                epath = get_job_path(hold_ids[i])
+            except IndexError:
+                raise IndexError('Not enough hold jobs in the queue.')
             print(f'Copy files from {ipath} to {epath}')
             for item in os.listdir(ipath):
                 s = os.path.join(ipath, item)

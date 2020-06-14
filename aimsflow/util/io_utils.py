@@ -100,7 +100,11 @@ def immed_file_paths(folder):
 
 def make_path(path):
     if not os.path.isdir(path):
-        os.mkdir(path)
+        try:
+            os.mkdir(path)
+        except FileNotFoundError:
+            make_path(path.rsplit('/', 1)[0])
+            make_path(path)
 
 
 def loadfn(fn, *args, **kwargs):
