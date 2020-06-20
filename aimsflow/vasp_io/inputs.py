@@ -692,7 +692,7 @@ class Potcar(list):
         for el in elements:
             psp = []
             symbol = potcar_setting.get(el, el)
-            paths_to_try = [os.path.join(PSP_DIR, fundir, "POTCAR.%s" % symbol),
+            paths_to_try = [os.path.join(PSP_DIR, fundir, f"POTCAR.{symbol}"),
                             os.path.join(PSP_DIR, fundir, symbol, "POTCAR")]
             for p in paths_to_try:
                 p = os.path.expanduser(p)

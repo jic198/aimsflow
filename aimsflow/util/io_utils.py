@@ -4,7 +4,9 @@ import sys
 import bz2
 import gzip
 import shutil
+import tarfile
 import warnings
+from glob import glob
 from collections import OrderedDict, defaultdict
 
 try:
@@ -199,31 +201,23 @@ def copy_r(src, dst):
         else:
             warnings.warn("Cannot copy %s to itself" % f_path)
 
-# def get_layer_info(self, tol=0.25, reverse=False, complex_layer=False):
-#     layers = self.sort_sites_in_layers(tol, reverse)
-#     dists = []
-#     for i in range(1, len(layers)):
-#         l1 = [s.coords[2] for s in layers[i - 1]]
-#         l2 = [s.coords[2] for s in layers[i]]
-#         dists.append(sum(l2) / len(l2) - sum(l1) / len(l1))
-#     l_name = [Composition("".join([i.species_string for i in j]))
-#               for j in layers]
-#     if_ind = []
-#     if_dist = []
-#     if_name = []
-#     for i in range(2, len(l_name)):
-#         if not complex_layer:
-#             if l_name[i] in l_name[i - 2:i]:
-#                 continue
-#         else:
-#             if l_name[i] in l_name[i - 2:i] or \
-#                     (i != len(l_name) - 1 and
-#                              l_name[i + 1] in l_name[i - 1:i + 1]):
-#                 continue
-#         if_ind.append((i - 1, i))
-#         if_dist.append(dists[i - 1])
-#         if_name.append("/".join([l_name[i - 1].reduced_formula,
-#                                  l_name[i].reduced_formula]))
-#
-#     return {"layers": layers, "dists": dists, "if_ind": if_ind,
-#             "if_dist": if_dist, "if_name": if_name}
+
+def backup(filenames, prefix="error"):
+    """
+    Copied from Custodian
+    Backup files to a tar.gz file. Used, for example, in backing up the
+    files of an errored run before performing corrections.
+
+    Args:
+        filenames ([str]): List of files to backup. Supports wildcards, e.g.,
+            *.*.
+        prefix (str): prefix to the files. Defaults to error, which means a
+            series of error.1.tar.gz, error.2.tar.gz, ... will be generated.
+    """
+    num = max([0] + [int(f.split(".")[1])
+                     for f in glob("{}.*.tar.gz".format(prefix))])
+    filename = "{}.{}.tar.gz".format(prefix, num + 1)
+    with tarfile.open(filename, "w:gz") as tar:
+        for fname in filenames:
+            for f in glob(fname):
+                tar.add(f)

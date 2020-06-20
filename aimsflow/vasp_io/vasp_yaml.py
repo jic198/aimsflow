@@ -1,3 +1,4 @@
+import os
 import re
 import copy
 from getpass import getuser
@@ -168,7 +169,6 @@ class VaspYaml(OrderedDict):
                 batch_run['-N'] += '_' + name_suffix
             else:
                 batch_run['-J'] += '_' + name_suffix
-        job_name = batch_run['-N'] if MANAGER == 'PBS' else batch_run['-J']
         vasp_input['RUN_SCRIPT'] = batch_run.__str__()
         vasp_input['CHECK_SCRIPT'] = file_to_str('%s/checkscript.sh' % work_dir)
         incar = Incar.from_file('%s/INCAR' % work_dir) if incar is None else incar
@@ -197,7 +197,7 @@ class VaspYaml(OrderedDict):
         vasp_input[DIRNAME[job_type].upper()] = job
 
         if not folder_name:
-            folder_name = job_name
+            folder_name = '.'
         vasp_input['POSCAR'] = {}
         vasp_input['POSCAR'][folder_name] = str(poscar)
         return VaspYaml(vasp_input)
@@ -213,7 +213,7 @@ class VaspYaml(OrderedDict):
                'p': 'cp ../static/WAVECAR .\ncp ../static/CONTCAR POSCAR'
                }
         for jn, string in vasp_jobs.items():
-            jp = '%s/%s' % (work_dir, jn)
+            jp = f'{work_dir}/{jn}'
             poscar = Poscar.from_string(string)
             if len(jt) > 1:
                 make_path(jp)
@@ -260,10 +260,12 @@ class VaspYaml(OrderedDict):
             jn += str(suffix)
         print(f'aimsflow is working on {jp}')
         make_path(jp)
-        poscar.write_file('%s/POSCAR' % jp)
+        poscar.write_file(f'{jp}/POSCAR')
+        if not os.path.exists(f'{jp}/POSCAR.orig'):
+            poscar.write_file(f'{jp}/POSCAR.orig')
         elements = poscar.site_symbols
         pot = Potcar.from_elements(elements, functional)
-        pot.write_file('%s/POTCAR' % jp)
+        pot.write_file(f'{jp}/POTCAR')
         incar = Incar(self[jt_up]['INCAR'])
         # if any([i > 20 for i in poscar.structure.lattice.abc]):
         #     incar['AMIN'] = 0.01

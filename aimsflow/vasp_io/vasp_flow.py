@@ -12,9 +12,12 @@ from aimsflow import Structure, ADD_WALLTIME
 from aimsflow.vasp_io import Incar, Outcar, Poscar, Potcar, BatchFile, \
     DIRNAME, TIME_TAG, MANAGER, WALLTIME, Kpoints, VaspYaml
 from aimsflow.util import file_to_str, str_to_file, time_to_second, \
-    second_to_time, time_lapse, immed_files, make_path, immed_file_paths
+    second_to_time, time_lapse, immed_files, backup, immed_file_paths
 
 VASPFILES = ['INCAR', 'KPOINTS', 'POSCAR', 'POTCAR']
+
+VASP_BACKUP_FILES = {"INCAR", "KPOINTS", "POSCAR", "OUTCAR", "CONTCAR",
+                     "OSZICAR", "vasprun.xml", "vasp.out"}
 
 
 class VaspFlow(object):
@@ -309,14 +312,7 @@ def continue_job(jt, folder, message="", max_run=5):
         job, work_dir, functional = modify_job(jt, folder, message=message,
                                                max_run=max_run)
         job.prepare_vasp(jt, work_dir, functional)
-        if work_dir == folder:
-            # For a 2nd run, submit_dir should be "relax", "static" or "md"
-            submit_dir = os.path.join(folder, DIRNAME[jt])
-        else:
-            # folder directory contains "relax", "static" or "md". work_dir is
-            # out_folder
-            submit_dir = os.path.join(work_dir, DIRNAME[jt])
-        submit(submit_dir)
+        submit(work_dir)
 
 
 def modify_job(jt, folder, message="", max_run=5, **kwargs):
@@ -343,41 +339,22 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
         return
 
     walltime = None
-    out_folder = os.path.abspath(folder).rsplit('/', 1)[0]
-    work_dir = out_folder
-    run_times = len(glob.glob(os.path.join(out_folder, DIRNAME[jt] + '_run*')))
+    work_dir = os.path.abspath(folder)
+    run_times = len(glob.glob(os.path.join(work_dir, 'error*tar.gz')))
     if run_times >= max_run:
         raise RuntimeError(f"aimsflow has tried at least {max_run} times rerun and "
-                           f"will stop trying in {folder}")
-    elif run_times == 1:
-        # The current directory contains "relax", "static" or "md"
-        name = DIRNAME[jt] + '_run2'
-        name_suffix = '2'
-    elif run_times == 0:
-        if not os.path.exists(os.path.join(out_folder, DIRNAME[jt])):
-            # the current directory is "relax", "static" or "md"
-            work_dir = folder
-        name = DIRNAME[jt] + '_run1'
-        name_suffix = '2'
-    else:
-        name = DIRNAME[jt] + '_run' + str(run_times + 1)
-        name_suffix = str(run_times + 1)
-    previous_folder = os.path.join(work_dir, name)
-    make_path(previous_folder)
+                           f"will stop trying in {work_dir}")
 
-    pot = Potcar.from_file("%s/POTCAR" % folder)
-    incar = Incar.from_file("%s/INCAR" % folder)
+    pot = Potcar.from_file("%s/POTCAR" % work_dir)
+    incar = Incar.from_file("%s/INCAR" % work_dir)
     functional = pot.functional
     if any([i in message for i in ['incompatible', 'PRICEL', 'POSMAP']]):
         if 'PRICEL' in message:
             incar.update({"SYMPREC": 1e-8, "ISYM": 0})
         elif 'POSMAP' in message:
             incar.update({"SYMPREC": 1e-6})
-        job = VaspYaml.generate_from_vasp_files(folder, incar=incar,
-                                                name_suffix=name_suffix,
-                                                folder_name=DIRNAME[jt])
-        for f in immed_file_paths(folder):
-            shutil.move(f, previous_folder)
+        job = VaspYaml.generate_from_vasp_files(work_dir, incar=incar)
+        backup(VASP_BACKUP_FILES)
         return job, work_dir, functional
 
     if jt == "r":
@@ -466,11 +443,8 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
                 raise RuntimeError("aimsflow failed to fix %s for job in %s"
                                    % (message, folder))
     job = VaspYaml.generate_from_vasp_files(folder, incar=incar, poscar=s,
-                                            name_suffix=name_suffix,
-                                            folder_name=DIRNAME[jt],
                                             walltime=walltime)
-    for f in immed_file_paths(folder):
-        shutil.move(f, previous_folder)
+    backup(VASP_BACKUP_FILES)
     return job, work_dir, functional
 
 
