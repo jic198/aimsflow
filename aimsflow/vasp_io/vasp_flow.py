@@ -92,7 +92,7 @@ class VaspFlow(object):
                 walltime = time_to_second(script["-t"])
             return time_lapse(date) > walltime
 
-        js = defaultdict(dict)
+        js = {'converge': {}, "un_converge": {}}
         for k, v in self.folders.items():
             js["converge"][k] = []
             js["un_converge"][k] = {}
@@ -154,7 +154,7 @@ class VaspFlow(object):
                     else:
                         js["un_converge"][k][folder] = "Still running"
                     continue
-                incar = Incar.from_file("%s/INCAR" % folder)
+                incar = Incar.from_file(f"{folder}/INCAR")
                 ionic_step = outcar.ionic_step
                 nsw = incar.get("NSW", 0)
                 if k == "r":
@@ -377,7 +377,7 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
                 incar.update({"SYMPREC": 1e-8})
             elif "PRICEL" in message:
                 incar.update({"SYMPREC": 1e-8, "ISYM":0})
-        else:
+        elif "walltime" not in message:
             incar.update({"ALGO": "Normal"})
         s = Poscar.from_file("%s/POSCAR" % folder)
 
