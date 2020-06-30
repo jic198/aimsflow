@@ -279,7 +279,8 @@ class VaspFlow(object):
         for k, v in self.folders.items():
             for path in v:
                 for f in immed_files(path):
-                    if f not in VASPFILES and not fnmatch(f, "*sh"):
+                    if f not in VASPFILES and not fnmatch(f, "*sh") \
+                            and not fnmatch(f, "*.orig"):
                         os.remove("{}/{}".format(path, f))
 
 
