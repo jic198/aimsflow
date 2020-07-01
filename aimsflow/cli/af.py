@@ -97,7 +97,7 @@ def queue(args):
             except IndexError:
                 raise IndexError('Not enough hold jobs in the queue.')
             bf = BatchFile.from_file(f'{ipath}/checkscript.sh')
-            bf.update({f'command': 'cd $SLURM_SUBMIT_DIR\nmv * {ipath}\n'})
+            bf.update({'command': f'cd $SLURM_SUBMIT_DIR\nmv * {ipath}\n'})
             bf.write_file(f'{ipath}/checkscript.sh')
             print(f'Copy files from {ipath} to {epath}')
             for item in os.listdir(ipath):
