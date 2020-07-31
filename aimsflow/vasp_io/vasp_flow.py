@@ -130,7 +130,7 @@ class VaspFlow(object):
                     continue
 
                 sys_out = sorted([i for i in glob.glob(f"{folder}/out.*")
-                                  if '.check.' in i])[-1]
+                                  if '.check.' not in i])[-1]
                 m = re.search("out\.(\d+)", sys_out)
                 if m:
                     job_id = m.group(1)
