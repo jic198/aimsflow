@@ -368,7 +368,7 @@ def modify_job(jt, folder, message="", max_run=5, **kwargs):
                 incar.update({"NBANDS": int(1.1 * nbands)})
             elif "ZPOTRF" in message:
                 potim = incar.get("POTIM", 0.5) / 2.0
-                incar.update({"POTIM": potim})
+                incar.update({"ISYM": 0, "POTIM": potim})
             elif "EDDDAV" in message:
                 incar.update({"ALGO": "All"})
             elif any([i in message for i in ["EDWAV", "Tetrahedron"]]):
