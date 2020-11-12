@@ -1493,8 +1493,6 @@ class Lobsterin(dict):
         Returns:
             Lobsterin Object with standard settings
         """
-        warnings.warn(
-            "Always check and test the provided basis functions. The spilling of your Lobster calculation might help")
         # warn that fatband calc cannot be done with tetrahedron method at the moment
         if option not in ['standard', 'standard_from_projection', 'standard_with_fatband', 'onlyprojection', 'onlydos',
                           'onlycohp', 'onlycoop', 'onlycohpcoop']:

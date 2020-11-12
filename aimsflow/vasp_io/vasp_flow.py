@@ -129,23 +129,26 @@ class VaspFlow(object):
                     js["un_converge"][k][folder] = message
                     continue
 
-                sys_out = sorted([i for i in glob.glob(f"{folder}/out.*")
-                                  if '.check.' not in i])[-1]
-                m = re.search("out\.(\d+)", sys_out)
-                if m:
-                    job_id = m.group(1)
-                    try:
-                        if MANAGER == 'SLURM':
-                            js_str = subprocess.check_output(['squeue', '-j', job_id],
-                                                             stderr=subprocess.STDOUT).decode('UTF-8')
-                            status = js_str.split()[-4]
-                        else:
-                            js_str = subprocess.check_output(["qstat", "-f", job_id],
-                                                             stderr=subprocess.STDOUT).decode('UTF-8')
-                            status = re.search("job_state = (\w)", js_str).group(1)
-                    except (subprocess.CalledProcessError, OSError):
+                try:
+                    sys_out = sorted([i for i in glob.glob(f"{folder}/out.*")
+                                      if '.check.' not in i])[-1]
+                    m = re.search("out\.(\d+)", sys_out)
+                    if m:
+                        job_id = m.group(1)
+                        try:
+                            if MANAGER == 'SLURM':
+                                js_str = subprocess.check_output(['squeue', '-j', job_id],
+                                                                 stderr=subprocess.STDOUT).decode('UTF-8')
+                                status = js_str.split()[-4]
+                            else:
+                                js_str = subprocess.check_output(["qstat", "-f", job_id],
+                                                                 stderr=subprocess.STDOUT).decode('UTF-8')
+                                status = re.search("job_state = (\w)", js_str).group(1)
+                        except (subprocess.CalledProcessError, OSError):
+                            status = "C"
+                    else:
                         status = "C"
-                else:
+                except IndexError:
                     status = "C"
 
                 outcar = Outcar(outcar_file)
