@@ -11,7 +11,7 @@ setup(
     setup_requires=['numpy', 'setuptools>=18.0'],
     install_requires=["numpy>=1.9", "six>=1.10.0", "pyyaml>=3.11",
                       "scipy>=0.14", "tabulate", "spglib>=1.9.9.44",
-                      "enum34>=1.1.6"],
+                      ],
     package_data={"aimsflow.core": ["*.json"],
                   "aimsflow.vasp_io": ["*.yaml"]},
     include_package_data=True,
