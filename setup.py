@@ -8,9 +8,9 @@ setup(
     name="aimsflow",
     packages=find_packages(),
     version="0.1.0",
-    setup_requires=['numpy', 'setuptools>=18.0'],
-    install_requires=["numpy>=1.9", "six>=1.10.0", "pyyaml>=3.11",
-                      "scipy>=0.14", "tabulate", "spglib>=1.9.9.44",
+    setup_requires=['setuptools>=18.0'],
+    install_requires=["numpy", "six", "pyyaml", "scipy", "tabulate", 
+                      "spglib", 'pymatgen', 'aimsgb'
                       ],
     package_data={"aimsflow.core": ["*.json"],
                   "aimsflow.vasp_io": ["*.yaml"]},

@@ -6,7 +6,9 @@ import numpy as np
 from numpy import inner, sqrt
 from itertools import groupby
 
-from aimsflow import Structure, Lattice, PeriodicSite, SlabGenerator
+from aimsgb import Grain
+from pymatgen.core import Lattice, PeriodicSite
+from pymatgen.core.surface import SlabGenerator
 from aimsflow.cli.af_calculate import oxi_displace
 from aimsflow.util import float_filename, flatten_lists, parse_number
 
@@ -18,16 +20,16 @@ def build_hs(args):
         raise IOError("Inconsistent number of POSCARs and uc.")
     structs = []
     for i, f in enumerate(files):
-        s = Structure.from_file(f)
+        s = Grain.from_file(f)
         s.make_supercell([1, 1, uc[i]])
         structs.append(s)
 
     if args.sw:
-        hs = Structure.get_sandwich(
+        hs = Grain.get_sandwich(
             structs, delete_layer=args.delete_layer, vacuum=args.vacuum,
             tol=args.tol, dist=args.extra_distance, to_primitive=args.primitive)
     else:
-        hs = Structure.get_heterostructure(
+        hs = Grain.get_heterostructure(
             structs, delete_layer=args.delete_layer, vacuum=args.vacuum,
             tol=args.tol, dist=args.extra_distance, to_primitive=args.primitive)
         if args.sd:
@@ -36,7 +38,7 @@ def build_hs(args):
 
 
 def build_sc(args):
-    s = Structure.from_file(args.poscar)
+    s = Grain.from_file(args.poscar)
     scaling_matrix = np.array(args.scaling_matrix.split(","), np.int16)
     if len(scaling_matrix) == 9:
         scaling_matrix = scaling_matrix.reshape(3, 3)
@@ -47,7 +49,7 @@ def build_sc(args):
 
 
 def build_slab(args):
-    s = Structure.from_file(args.poscar)
+    s = Grain.from_file(args.poscar)
     miller_index = list(map(int, args.miller_index.split(",")))
     primitive = False if args.conventional else True
     g = SlabGenerator(s, miller_index, args.unit_cell, args.vacuum, center_slab=args.center,
@@ -61,12 +63,12 @@ def build_slab(args):
 
 def build_strain(args):
     strain = [float(i) for i in args.strain]
-    structure = Structure.from_file(args.poscar)
+    structure = Grain.from_file(args.poscar)
     d = dict(zip(args.direction, [1] * len(args.direction)))
     direct = [d.get(i, 0) for i in "xyz"]
 
     for i in strain:
-        struct = structure.copy()
+        struct = Grain.copy()
         s = np.multiply(direct, i / 100)
         struct.add_strain(s)
         name = float_filename(i)
@@ -75,7 +77,7 @@ def build_strain(args):
 
 
 def build_rotate(args):
-    struct = Structure.from_file(args.poscar)
+    struct = Grain.from_file(args.poscar)
     site_num = [i - 1 for i in parse_number(args.site_number)]
     axis = list(map(int, args.axis.split(",")))
     anchor = list(map(float, args.anchor.split(",")))
@@ -85,7 +87,7 @@ def build_rotate(args):
 
 def build_if(args):
     f = args.poscar
-    struct = Structure.from_file(f)
+    struct = Grain.from_file(f)
     dist = args.dist
     layer_info = struct.get_layer_info(args.nlayers, args.tol)
     layers = layer_info["layers"]
@@ -125,7 +127,7 @@ def build_if(args):
             new_sites.append(PeriodicSite(s.specie, s.coords + [0, 0, l],
                                           new_lat, coords_cartesian=True,
                                           properties=s.properties))
-        new_s = Structure.from_sites(new_sites)
+        new_s = Grain.from_sites(new_sites)
         new_s = new_s.get_sorted_structure()
         name = float_filename(d)
         new_s.to(filename="%s_%s" % (f, name))
@@ -133,7 +135,7 @@ def build_if(args):
 
 def translate_sites(args):
     f = args.poscar
-    struct = Structure.from_file(f)
+    struct = Grain.from_file(f)
     site_number = [i - 1 for i in parse_number(args.site_number)] \
         if args.site_number else None
     frac_coords = False if args.cartesian else True
@@ -157,7 +159,7 @@ def translate_sites(args):
 
 def remove(args):
     f = args.poscar
-    struct = Structure.from_file(f)
+    struct = Grain.from_file(f)
     if args.site_number:
         site_number = [i - 1 for i in parse_number(args.site_number)]
         struct.remove_sites(site_number)
@@ -181,7 +183,7 @@ def build_ferro(args):
     new_struct = []
     if args.opposite:
         for f in files:
-            s = Structure.from_file(f)
+            s = Grain.from_file(f)
             layers = s.sort_sites_in_layers(tol, reverse)
             new_sites = []
             for l in layers:
@@ -196,10 +198,10 @@ def build_ferro(args):
                         new_sites.append(PeriodicSite(
                             i.species_string, frac, i.lattice,
                              properties=i.properties))
-            new_struct.append(Structure.from_sites(new_sites))
+            new_struct.append(Grain.from_sites(new_sites))
     else:
         try:
-            pa_struct, fe_struct = (Structure.from_file(f).get_layered_structure()
+            pa_struct, fe_struct = (Grain.from_file(f).get_layered_structure()
                                     for f in files)
             coord_diff = fe_struct.cart_coords - pa_struct.cart_coords
             coord_diff[:, :2] = 0.0
@@ -215,7 +217,7 @@ def build_ferro(args):
                     pa_struct.lattice, pa_struct.species, new_coord,
                     coords_cartesian=True, site_properties=pa_struct.site_properties))
         elif args.transplant:
-            op_struct = Structure.from_file(args.transplant).get_layered_structure()
+            op_struct = Grain.from_file(args.transplant).get_layered_structure()
             new_coord = op_struct.cart_coords + coord_diff
             new_struct.append(Structure(
                 op_struct.lattice, op_struct.species, new_coord,
