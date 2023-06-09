@@ -13,7 +13,7 @@ from aimsflow.cli.af_calculate import oxi_displace
 from aimsflow.util import float_filename, flatten_lists, parse_number
 
 
-def build_hs(args):
+def build_interface(args):
     files = args.poscars
     uc = [int(i) for i in args.uc.split(",")]
     if len(uc) != len(files):
@@ -29,7 +29,7 @@ def build_hs(args):
             structs, delete_layer=args.delete_layer, vacuum=args.vacuum,
             tol=args.tol, dist=args.extra_distance, to_primitive=args.primitive)
     else:
-        hs = Grain.get_heterostructure(
+        hs = Grain.stack_grains(
             structs, delete_layer=args.delete_layer, vacuum=args.vacuum,
             tol=args.tol, dist=args.extra_distance, to_primitive=args.primitive)
         if args.sd:
@@ -94,7 +94,7 @@ def build_if(args):
     sorted_sites = flatten_lists(layers)
     it_l = layer_info["if_ind"]
     if not it_l:
-        raise IOError("aimsflow cannot find an interface for %s" % f)
+        raise IOError(f"aimsflow cannot find an interface for {f}")
     abc, angles = struct.lattice.lengths_and_angles
 
     for d in dist:

@@ -23,7 +23,7 @@ from aimsflow.cli.af_calculate import emass, tolerance_factor, interface_dist,\
     if_bond_len, ki, orb_ki, displace, polarization, berry_phase_polarization
 from aimsflow.cli.af_plot import plot_tdos, plot_pdos, plot_ldos, plot_band,\
     plot_band_pro, plot_locpot
-from aimsflow.cli.af_build import build_hs, build_strain, build_if, build_ferro,\
+from aimsflow.cli.af_build import build_interface, build_strain, build_if, build_ferro,\
     build_sc, build_rotate, build_slab, translate_sites, remove
 from aimsflow.util import str_to_file, file_to_str, Citation, immed_subdir_paths
 
@@ -691,26 +691,26 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter)
     build_subparser = parser_build.add_subparsers(title='action', dest='action command')
 
-    hs_parser = build_subparser.add_parser(
-        'hs', help='Heterostructure\nE.g. aimsflow build hs POSCAR_sub '
+    interface_parser = build_subparser.add_parser(
+        'interface', help='Heterostructure\nE.g. aimsflow build interface POSCAR_sub '
                    'POSCAR_film -u 3,3 -dl 1t1t1b1b -v 10 -sd 4',
         formatter_class=argparse.RawTextHelpFormatter)
-    hs_parser.add_argument('poscars', **pss_kwargs)
-    hs_parser.add_argument('-u', '--uc', type=str, required=True,
+    interface_parser.add_argument('poscars', **pss_kwargs)
+    interface_parser.add_argument('-u', '--uc', type=str, required=True,
                            help='Unit cell for each POSCAR,\nE.g. 3,3,3')
-    hs_parser.add_argument(*vt_args, **vt_kwargs)
-    hs_parser.add_argument('-dl', '--delete_layer', default=None, **dl_kwargs)
-    hs_parser.add_argument('-ed', '--extra_distance', **ed_kwargs)
-    hs_parser.add_argument(*tol_args, **tol_kwargs)
-    hs_parser.add_argument('-sd', '--sd', metavar='SD_layers', type=int,
+    interface_parser.add_argument(*vt_args, **vt_kwargs)
+    interface_parser.add_argument('-dl', '--delete_layer', default=None, **dl_kwargs)
+    interface_parser.add_argument('-ed', '--extra_distance', **ed_kwargs)
+    interface_parser.add_argument(*tol_args, **tol_kwargs)
+    interface_parser.add_argument('-sd', '--sd', metavar='SD_layers', type=int,
                            help='Number of substrate layers to be fixed')
-    hs_parser.add_argument('-sw', '--sw', action='store_true',
+    interface_parser.add_argument('-sw', '--sw', action='store_true',
                            help='Whether HS is a sandwidch type\nE.g. aimsflow '
-                                'build hs POSCAR_sub POSCAR_film -u 3,3 -dl '
+                                'build interface POSCAR_sub POSCAR_film -u 3,3 -dl '
                                 '1t1t1b1b -v 10 -sw')
-    hs_parser.add_argument('-p', '--primitive', action='store_true',
+    interface_parser.add_argument('-p', '--primitive', action='store_true',
                            help='Whether to get primitive structure ')
-    hs_parser.set_defaults(func=build_hs)
+    interface_parser.set_defaults(func=build_interface)
 
     sc_parser = build_subparser.add_parser(
         'sc', help='Supercell\nE.g. aimsflow build sc POSCAR 1,1,4',
