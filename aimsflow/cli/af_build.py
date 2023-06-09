@@ -14,23 +14,17 @@ from aimsflow.util import float_filename, flatten_lists, parse_number
 
 
 def build_interface(args):
-    files = args.poscars
     uc = [int(i) for i in args.uc.split(",")]
-    if len(uc) != len(files):
-        raise IOError("Inconsistent number of POSCARs and uc.")
-    structs = []
-    for i, f in enumerate(files):
-        s = Grain.from_file(f)
-        s.make_supercell([1, 1, uc[i]])
-        structs.append(s)
-
+    grain_a = Grain.from_file(args.substrate).make_supercell([1, 1, uc[0]])
+    grain_b = Grain.from_file(args.film).make_supercell([1, 1, uc[1]])
+    
     if args.sw:
         hs = Grain.get_sandwich(
             structs, delete_layer=args.delete_layer, vacuum=args.vacuum,
             tol=args.tol, dist=args.extra_distance, to_primitive=args.primitive)
     else:
         hs = Grain.stack_grains(
-            structs, delete_layer=args.delete_layer, vacuum=args.vacuum,
+            grain_a, grain_b, delete_layer=args.delete_layer, vacuum=args.vacuum,
             tol=args.tol, dist=args.extra_distance, to_primitive=args.primitive)
         if args.sd:
             hs = hs.add_selective_dynamics(args.sd)

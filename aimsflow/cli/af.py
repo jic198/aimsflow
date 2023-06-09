@@ -695,9 +695,10 @@ def main():
         'interface', help='Heterostructure\nE.g. aimsflow build interface POSCAR_sub '
                    'POSCAR_film -u 3,3 -dl 1t1t1b1b -v 10 -sd 4',
         formatter_class=argparse.RawTextHelpFormatter)
-    interface_parser.add_argument('poscars', **pss_kwargs)
-    interface_parser.add_argument('-u', '--uc', type=str, required=True,
-                           help='Unit cell for each POSCAR,\nE.g. 3,3,3')
+    interface_parser.add_argument('substrate', **ps_kwargs)
+    interface_parser.add_argument('film', **ps_kwargs)
+    interface_parser.add_argument('-u', '--uc', type=str, default='1,1',
+                                  help='Unit cell for each POSCAR,\nE.g. 3,3')
     interface_parser.add_argument(*vt_args, **vt_kwargs)
     interface_parser.add_argument('-dl', '--delete_layer', default=None, **dl_kwargs)
     interface_parser.add_argument('-ed', '--extra_distance', **ed_kwargs)
