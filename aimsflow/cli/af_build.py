@@ -16,18 +16,19 @@ from aimsflow.util import float_filename, flatten_lists, parse_number
 def build_interface(args):
     uc = [int(i) for i in args.uc.split(",")]
     grain_a = Grain.from_file(args.substrate).make_supercell([1, 1, uc[0]])
+    if args.fix_layers:
+        grain_a.fix_sites_in_layers(range(args.fix_layers), direction=args.direction, tol=args.tol)
     grain_b = Grain.from_file(args.film).make_supercell([1, 1, uc[1]])
+    hs = Grain.stack_grains(grain_a, grain_b, delete_layer=args.delete_layer, vacuum=args.vacuum,
+                            tol=args.tol, gap=args.gap, to_primitive=args.primitive)
     
-    if args.sw:
-        hs = Grain.get_sandwich(
-            structs, delete_layer=args.delete_layer, vacuum=args.vacuum,
-            tol=args.tol, dist=args.extra_distance, to_primitive=args.primitive)
-    else:
-        hs = Grain.stack_grains(
-            grain_a, grain_b, delete_layer=args.delete_layer, vacuum=args.vacuum,
-            tol=args.tol, dist=args.extra_distance, to_primitive=args.primitive)
-        if args.sd:
-            hs = hs.add_selective_dynamics(args.sd)
+    if args.sandwidch:
+        f_coords = hs.frac_coords
+        f_coords[:, 2] = 1 - f_coords[:, 2]
+        _hs = Grain(hs.lattice, hs.species, f_coords, site_properties=hs.site_properties)
+        hs = Grain.stack_grains(_hs, hs)
+        hs.merge_sites(mode="delete")
+        hs = hs.get_sorted_structure()
     hs.to(filename="POSCAR")
 
 
