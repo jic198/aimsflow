@@ -217,8 +217,6 @@ def main():
     source_kwargs = {'default': 'DOSCAR', 'type': str, 'nargs': '?',
                      'help': "Source file is either 'DOSCAR' or 'vasprun.xml' "
                              "(default: %(default)s)"}
-    ed_kwargs = {'type': float, 'default': 0.0, 'nargs': '?',
-                 'help': 'Add or delete extra distance at interface.'}
     dl_kwargs = {'type': str, 'nargs': '?',
                  'help': 'Set delete top or bottom layers. (default: %(default)s)'}
     ps_kwargs = {'type': str, 'help': 'Structure file'}
@@ -229,8 +227,8 @@ def main():
 
     sn_args = ['-sn', '--site_number']
     d_args = ['-d', '--direction']
-    vt_args = ['-v', '--vacuum']
-    vt_kwargs = {'type': float, 'default': 0.0, 'const': 0.0, 'nargs': '?',
+    v_args = ['-v', '--vacuum']
+    v_kwargs = {'type': float, 'default': 0.0, 'const': 0.0, 'nargs': '?',
                  'help': 'Set vacuum thickness for slab.'}
     xlim_args = ['-x', '--xlim']
     xlim_kwargs = {'default': [-4, 4], 'type': float, 'nargs': 2,
@@ -693,19 +691,22 @@ def main():
 
     interface_parser = build_subparser.add_parser(
         'interface', help='Heterostructure\nE.g. aimsflow build interface POSCAR_sub '
-                   'POSCAR_film -u 3,3 -dl 1t1t1b1b -v 10 -sd 4',
+                   'POSCAR_film -u 3,3 -dl 1t1t1b1b -v 10 -fl 4',
         formatter_class=argparse.RawTextHelpFormatter)
     interface_parser.add_argument('substrate', **ps_kwargs)
     interface_parser.add_argument('film', **ps_kwargs)
     interface_parser.add_argument('-u', '--uc', type=str, default='1,1',
                                   help='Unit cell for each POSCAR,\nE.g. 3,3')
-    interface_parser.add_argument(*vt_args, **vt_kwargs)
+    interface_parser.add_argument(*v_args, **v_kwargs)
     interface_parser.add_argument('-dl', '--delete_layer', default=None, **dl_kwargs)
-    interface_parser.add_argument('-ed', '--extra_distance', **ed_kwargs)
+    interface_parser.add_argument('-g', '--gap', type=float, default=0.0, nargs='?',
+                                  help='Gap between substrate and film in Angstroms.')
+    interface_parser.add_argument(*d_args, type=int, default=2, nargs='?',
+                                  help='Stacking direction of the interface structure. 0: a, 1: b, 2: c.')
     interface_parser.add_argument(*tol_args, **tol_kwargs)
-    interface_parser.add_argument('-sd', '--sd', metavar='SD_layers', type=int,
-                           help='Number of substrate layers to be fixed')
-    interface_parser.add_argument('-sw', '--sw', action='store_true',
+    interface_parser.add_argument('-fl', '--fix_layers', type=int,
+                                  help='Number of substrate layers to be fixed for selective dynamics calculations in VASP.')
+    interface_parser.add_argument('-sw', '--sandwidch', action='store_true',
                            help='Whether HS is a sandwidch type\nE.g. aimsflow '
                                 'build interface POSCAR_sub POSCAR_film -u 3,3 -dl '
                                 '1t1t1b1b -v 10 -sw')
@@ -749,7 +750,7 @@ def main():
                              help='center the slab in the cell with equal vacuum spacing '
                                   'from the top and bottom\nE.g. aimsflow build '
                                   'slab POSCAR 1,1,1 -v 15 -conventional')
-    slab_parser.add_argument(*vt_args, **vt_kwargs)
+    slab_parser.add_argument(*v_args, **v_kwargs)
     slab_parser.add_argument(*tol_args, **tol_kwargs)
     slab_parser.set_defaults(func=build_slab)
 
