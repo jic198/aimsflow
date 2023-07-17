@@ -15,10 +15,12 @@ from aimsflow.util import float_filename, flatten_lists, parse_number
 
 def build_interface(args):
     uc = [int(i) for i in args.uc.split(",")]
-    grain_a = Grain.from_file(args.substrate).make_supercell([1, 1, uc[0]])
+    grain_a = Grain.from_file(args.substrate)
+    grain_a.make_supercell([1, 1, uc[0]])
     if args.fix_layers:
         grain_a.fix_sites_in_layers(range(args.fix_layers), direction=args.direction, tol=args.tol)
-    grain_b = Grain.from_file(args.film).make_supercell([1, 1, uc[1]])
+    grain_b = Grain.from_file(args.film)
+    grain_b.make_supercell([1, 1, uc[1]])
     hs = Grain.stack_grains(grain_a, grain_b, delete_layer=args.delete_layer, vacuum=args.vacuum,
                             tol=args.tol, gap=args.gap, to_primitive=args.primitive)
     
