@@ -698,7 +698,7 @@ def main():
     interface_parser.add_argument('-u', '--uc', type=str, default='1,1',
                                   help='Unit cell for each POSCAR,\nE.g. 3,3')
     interface_parser.add_argument(*v_args, **v_kwargs)
-    interface_parser.add_argument('-dl', '--delete_layer', default=None, **dl_kwargs)
+    interface_parser.add_argument('-dl', '--delete_layer', default='0b0t0b0t', **dl_kwargs)
     interface_parser.add_argument('-g', '--gap', type=float, default=0.0, nargs='?',
                                   help='Gap between substrate and film in Angstroms.')
     interface_parser.add_argument(*d_args, type=int, default=2, nargs='?',
