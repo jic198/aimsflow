@@ -49,12 +49,13 @@ def build_slab(args):
     s = Grain.from_file(args.poscar)
     miller_index = list(map(int, args.miller_index.split(",")))
     primitive = False if args.conventional else True
-    g = SlabGenerator(s, miller_index, args.unit_cell, args.vacuum, center_slab=args.center,
-                      lll_reduce=True, primitive=primitive, max_normal_search=max(miller_index))
-    new_s = g.get_slab(args.delete_layer, args.shift, args.tol)
-    if args.sd:
-        fix_list = [i - 1 for i in parse_number(args.sd)]
-        new_s = new_s.add_selective_dynamics(fix_list, args.tol)
+    sg = SlabGenerator(s, miller_index, args.unit_cell, args.vacuum, center_slab=args.center,
+                      lll_reduce=True, primitive=primitive, max_normal_search=max(miller_index),
+                      in_unit_planes=True)
+    new_s = sg.get_slab(args.shift, args.tol)
+    # if args.sd:
+    #     fix_list = [i - 1 for i in parse_number(args.sd)]
+    #     new_s = new_s.add_selective_dynamics(fix_list, args.tol)
     new_s.to(filename="POSCAR")
 
 
