@@ -735,9 +735,9 @@ def main():
     slab_parser.add_argument('-dl', '--delete_layer', default='0b0t',
                              help='Delete bottom or top layers for slab. '
                                   '(default: %(default)s)')
-    slab_parser.add_argument('-sd', '--sd', metavar='SD_layers', type=str,
+    slab_parser.add_argument('-fl', '--fix_layers', type=int,
                              help='The range of layers to be fixed\nE.g. aimsflow build '
-                                  'slab POSCAR 1,1,1 -u 3 -sd 1-3')
+                                  'slab POSCAR 1,1,1 -u 3 -fl 3')
     slab_parser.add_argument('-s', '--shift', type=float, default=0.0, const=0.0, nargs='?',
                              help='A shift value in fractional coordinates that determines '
                                   'how much a slab should be shifted\nE.g. aimsflow build '
