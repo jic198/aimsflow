@@ -71,13 +71,12 @@ def build_strain(args):
     structure = Grain.from_file(args.poscar)
     d = dict(zip(args.direction, [1] * len(args.direction)))
     direct = [d.get(i, 0) for i in "xyz"]
-
     for i in strain:
-        struct = Grain.copy()
+        struct = structure.copy()
         s = np.multiply(direct, i / 100)
-        struct.add_strain(s)
+        struct.apply_strain(s)
         name = float_filename(i)
-        filename = "%s_%s" % (args.poscar, name)
+        filename = f"{args.poscar}_{name}"
         struct.to(filename=filename)
 
 
