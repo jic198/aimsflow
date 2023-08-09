@@ -39,8 +39,6 @@ def build_sc(args):
     scaling_matrix = np.array(args.scaling_matrix.split(","), np.int16)
     if len(scaling_matrix) == 9:
         scaling_matrix = scaling_matrix.reshape(3, 3)
-    # print(scaling_matrix)
-    # exit(0)
     s.make_supercell(scaling_matrix)
     s.to(filename="POSCAR")
 
@@ -53,9 +51,18 @@ def build_slab(args):
                       lll_reduce=True, primitive=primitive, max_normal_search=max(miller_index),
                       in_unit_planes=True)
     new_s = sg.get_slab(args.shift, args.tol)
-    # if args.sd:
-    #     fix_list = [i - 1 for i in parse_number(args.sd)]
-    #     new_s = new_s.add_selective_dynamics(fix_list, args.tol)
+    new_s = Grain(new_s.lattice, new_s.species, new_s.frac_coords, site_properties=new_s.site_properties)
+    delete_layer = args.delete_layer.lower()
+    delete = re.findall('(\d+)(\w)', delete_layer)
+    if len(delete) != 2:
+        raise ValueError(f"'{delete_layer}' is not supported. Please make sure the format "
+                            "is 0b0t.")
+    for v in delete:
+        for _ in range(int(v[0])):
+            new_s.delete_bt_layer(v[1], args.tol)
+    if args.fix_sites_in_layers:
+        new_s.fix_sites_in_layers(range(args.fix_sites_in_layers), args.tol)
+    new_s = new_s.get_sorted_structure()
     new_s.to(filename="POSCAR")
 
 

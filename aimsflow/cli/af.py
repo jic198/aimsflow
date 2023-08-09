@@ -731,13 +731,12 @@ def main():
     slab_parser.add_argument('miller_index', type=str,
                              help='Miller index of plane parallel to surface')
     slab_parser.add_argument('-u', '--unit_cell', type=int, nargs='?', default=1,
-                             const=1, help='Number of unit cell of the slab')
-    slab_parser.add_argument('-dl', '--delete_layer', default='0b0t',
+                             const=1, help='Number of unit cells of the hkl plane in the slab.')
+    slab_parser.add_argument('-dl', '--delete_layer', type=str, default='0b0t', nargs='?',
                              help='Delete bottom or top layers for slab. '
                                   '(default: %(default)s)')
-    slab_parser.add_argument('-fl', '--fix_layers', type=int,
-                             help='Number of bottom layers to be fixed for selective dynamics '
-                                  'calculations in VASP.')
+    slab_parser.add_argument('-fs', '--fix_sites_in_layers', type=int, default=0, nargs='?',
+                             help='Fix sites in bottom layers for selective dynamics calculations in VASP.')
     slab_parser.add_argument('-s', '--shift', type=float, default=0.0, const=0.0, nargs='?',
                              help='A shift value in fractional coordinates that determines '
                                   'how much a slab should be shifted\nE.g. aimsflow build '
@@ -750,7 +749,8 @@ def main():
                              help='center the slab in the cell with equal vacuum spacing '
                                   'from the top and bottom\nE.g. aimsflow build '
                                   'slab POSCAR 1,1,1 -v 15 -conventional')
-    slab_parser.add_argument(*v_args, **v_kwargs)
+    slab_parser.add_argument(*v_args, type=int, nargs='?', default=1, const=1, 
+                             help='Number of unit cells of the hkl plane in the vacuum.')
     slab_parser.add_argument(*tol_args, **tol_kwargs)
     slab_parser.set_defaults(func=build_slab)
 
