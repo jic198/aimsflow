@@ -14,9 +14,10 @@ try:
     from urllib.request import urlopen, urlretrieve
 except ImportError:
     from urllib import urlopen, urlretrieve
-from aimsflow import Structure
-from aimsflow.symmetry.bandstructure import HighSymmKpath
-from aimsflow.vasp_io import BatchFile, Poscar, Potcar, Kpoints, VaspFlow, MANAGER
+from aimsgb import Grain
+from pymatgen.io.vasp.inputs import Poscar, Potcar, Kpoints
+from pymatgen.symmetry.bandstructure import HighSymmKpath
+from aimsflow.vasp_io import BatchFile, VaspFlow, MANAGER
 from aimsflow.cli.af_config import configure_af
 from aimsflow.cli.af_jobflow import vasp, analyze, jyaml
 from aimsflow.cli.af_calculate import emass, tolerance_factor, interface_dist,\
@@ -164,7 +165,7 @@ def format_citation(args):
 
 
 def kpoints(args):
-    s = Structure.from_file(args.poscar)
+    s = Grain.from_file(args.poscar)
     if args.band:
         num_kpts = args.band
         k = HighSymmKpath(s)
