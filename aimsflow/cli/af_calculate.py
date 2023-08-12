@@ -7,8 +7,8 @@ import glob
 import numpy as np
 from numpy.linalg import norm
 from collections import OrderedDict
-
-from aimsflow import Structure, Composition, Specie, eff_radii, bd_val, born
+from pymatgen.core import Structure, Composition, Specie
+from aimsflow import eff_radii, bd_val, born
 from aimsflow.util import file_to_lines, str_to_file, parse_number, str_delimited
 from aimsflow.elect_struct.core import Orbital, OrbitalType
 from aimsflow.vasp_io import Eigenval, parse_outcar
