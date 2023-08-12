@@ -154,7 +154,7 @@ def potcar(args):
         elements = poscar.site_symbols
     elif args.symbol:
         elements = args.symbol
-    pot = Potcar.from_elements(elements, args.functional)
+    pot = Potcar(elements, args.functional)
     pot.write_file('POTCAR')
 
 
